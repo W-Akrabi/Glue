@@ -38,7 +38,7 @@ model Organization {
 model Request {
   id             String         @id @default(cuid())
   title          String
-  description    String         @db.Text
+  description    String
   status         RequestStatus  @default(PENDING)
   currentStep    Int            @default(1)
   organizationId String
