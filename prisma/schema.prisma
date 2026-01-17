@@ -78,7 +78,7 @@ model AuditLog {
   actor      User     @relation(fields: [actorId], references: [id])
   requestId  String?
   request    Request? @relation(fields: [requestId], references: [id])
-  metadata   Json?
+  metadata   String?
   timestamp  DateTime @default(now())
 
   @@index([entityType, entityId])
@@ -86,20 +86,3 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-enum Role {
-  MEMBER
-  APPROVER
-  ADMIN
-}
-
-enum RequestStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum StepStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
