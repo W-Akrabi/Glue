@@ -10,12 +10,10 @@ const libsql = createClient({
   url: `file:${process.cwd()}/prisma/dev.db`,
 });
 
-const adapter = new PrismaLibSQL(libsql);
+const adapter = new (PrismaLibSQL as any)(libsql);
 
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter,
-  });
+  new PrismaClient({ adapter } as any);
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
