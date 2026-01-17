@@ -1,14 +1,105 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String?
+  role          Role           @default(MEMBER)
+  organizationId String
+  organization  Organization   @relation(fields: [organizationId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  requests      Request[]      @relation("RequestCreator")
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Organization {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  users     User[]
+  requests  Request[]
+
+  @@map("organizations")
+}
+
+model Request {
+  id             String         @id @default(cuid())
+  title          String
+  description    String         @db.Text
+  status         RequestStatus  @default(PENDING)
+  currentStep    Int            @default(1)
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  createdById    String
+  createdBy      User           @relation("RequestCreator", fields: [createdById], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  approvalSteps  ApprovalStep[]
+  auditLogs      AuditLog[]
+
+  @@map("requests")
+}
+
+model ApprovalStep {
+  id           String       @id @default(cuid())
+  requestId    String
+  request      Request      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  stepNumber   Int
+  requiredRole Role
+  status       StepStatus   @default(PENDING)
+  approvedById String?
+  approvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  @@unique([requestId, stepNumber])
+  @@map("approval_steps")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  requestId  String?
+  request    Request? @relation(fields: [requestId], references: [id])
+  metadata   Json?
+  timestamp  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([requestId])
+  @@map("audit_logs")
+}
+
+enum Role {
+  MEMBER
+  APPROVER
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum StepStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
