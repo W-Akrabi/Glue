@@ -70,6 +70,13 @@ export default async function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             <Link
+              href="/org-select"
+              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              data-testid="nav-org-select"
+            >
+              Organization
+            </Link>
+            <Link
               href="/dashboard"
               className="px-3 py-4 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600"
               data-testid="nav-dashboard"
@@ -90,6 +97,15 @@ export default async function DashboardPage() {
             >
               New Request
             </Link>
+            {session.user.role === 'ADMIN' && (
+              <Link
+                href="/admin/workflows"
+                className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                data-testid="nav-admin-workflows"
+              >
+                Workflows
+              </Link>
+            )}
           </div>
         </div>
       </nav>

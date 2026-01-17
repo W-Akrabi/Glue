@@ -13,6 +13,16 @@ async function main() {
 
   console.log('✅ Created organization:', org.name);
 
+  // Create default approval workflow steps for the organization
+  await prisma.approvalWorkflowStep.createMany({
+    data: [
+      { organizationId: org.id, stepNumber: 1, requiredRole: 'APPROVER' },
+      { organizationId: org.id, stepNumber: 2, requiredRole: 'ADMIN' },
+    ],
+  });
+
+  console.log('✅ Created default approval workflow');
+
   // Hash passwords
   const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -52,6 +62,11 @@ async function main() {
   console.log('  - Approver:', approver.email, '(password: password123)');
   console.log('  - Member:', member.email, '(password: password123)');
 
+  const workflowSteps = await prisma.approvalWorkflowStep.findMany({
+    where: { organizationId: org.id },
+    orderBy: { stepNumber: 'asc' },
+  });
+
   // Create sample request with approval steps
   const request = await prisma.request.create({
     data: {
@@ -60,18 +75,11 @@ async function main() {
       organizationId: org.id,
       createdById: member.id,
       approvalSteps: {
-        create: [
-          {
-            stepNumber: 1,
-            requiredRole: 'APPROVER',
-            status: 'PENDING',
-          },
-          {
-            stepNumber: 2,
-            requiredRole: 'ADMIN',
-            status: 'PENDING',
-          },
-        ],
+        create: workflowSteps.map((step) => ({
+          stepNumber: step.stepNumber,
+          requiredRole: step.requiredRole,
+          status: 'PENDING',
+        })),
       },
     },
   });

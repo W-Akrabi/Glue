@@ -19,6 +19,15 @@ export async function createRequest(formData: FormData) {
   }
 
   try {
+    const workflowSteps = await prisma.approvalWorkflowStep.findMany({
+      where: { organizationId: session.user.organizationId! },
+      orderBy: { stepNumber: 'asc' },
+    });
+
+    if (workflowSteps.length === 0) {
+      return { error: 'No approval workflow configured' };
+    }
+
     const request = await prisma.request.create({
       data: {
         title,
@@ -26,10 +35,11 @@ export async function createRequest(formData: FormData) {
         organizationId: session.user.organizationId!,
         createdById: session.user.id,
         approvalSteps: {
-          create: [
-            { stepNumber: 1, requiredRole: 'APPROVER', status: 'PENDING' },
-            { stepNumber: 2, requiredRole: 'ADMIN', status: 'PENDING' },
-          ],
+          create: workflowSteps.map((step) => ({
+            stepNumber: step.stepNumber,
+            requiredRole: step.requiredRole,
+            status: 'PENDING',
+          })),
         },
       },
     });

@@ -56,6 +56,12 @@ export default async function RequestsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             <Link
+              href="/org-select"
+              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+            >
+              Organization
+            </Link>
+            <Link
               href="/dashboard"
               className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
             >
@@ -73,6 +79,14 @@ export default async function RequestsPage() {
             >
               New Request
             </Link>
+            {session.user.role === 'ADMIN' && (
+              <Link
+                href="/admin/workflows"
+                className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              >
+                Workflows
+              </Link>
+            )}
           </div>
         </div>
       </nav>

@@ -32,6 +32,7 @@ model Organization {
   createdAt DateTime  @default(now())
   users     User[]
   requests  Request[]
+  workflowSteps ApprovalWorkflowStep[]
 
   @@map("organizations")
 }
@@ -69,6 +70,18 @@ model ApprovalStep {
   @@map("approval_steps")
 }
 
+model ApprovalWorkflowStep {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  stepNumber     Int
+  requiredRole   String
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, stepNumber])
+  @@map("approval_workflow_steps")
+}
+
 model AuditLog {
   id         String   @id @default(cuid())
   entityType String
@@ -85,4 +98,3 @@ model AuditLog {
   @@index([requestId])
   @@map("audit_logs")
 }
-

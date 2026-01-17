@@ -1,5 +1,6 @@
 import { auth, signOut } from '@/auth';
 import { createRequest } from '@/lib/actions/requests';
+import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -9,6 +10,11 @@ export default async function NewRequestPage() {
   if (!session?.user) {
     redirect('/login');
   }
+
+  const workflowSteps = await prisma.approvalWorkflowStep.findMany({
+    where: { organizationId: session.user.organizationId! },
+    orderBy: { stepNumber: 'asc' },
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -105,10 +111,17 @@ export default async function NewRequestPage() {
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-800 font-medium mb-2">Approval Workflow:</p>
-              <ol className="text-sm text-blue-700 space-y-1 ml-4 list-decimal">
-                <li>Step 1: Manager (APPROVER) review</li>
-                <li>Step 2: Admin (ADMIN) final approval</li>
-              </ol>
+              {workflowSteps.length === 0 ? (
+                <p className="text-sm text-blue-700">No workflow steps configured.</p>
+              ) : (
+                <ol className="text-sm text-blue-700 space-y-1 ml-4 list-decimal">
+                  {workflowSteps.map((step) => (
+                    <li key={step.id}>
+                      Step {step.stepNumber}: {step.requiredRole} approval
+                    </li>
+                  ))}
+                </ol>
+              )}
             </div>
 
             <div className="flex gap-4">
