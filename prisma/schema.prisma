@@ -59,8 +59,8 @@ model ApprovalStep {
   requestId    String
   request      Request      @relation(fields: [requestId], references: [id], onDelete: Cascade)
   stepNumber   Int
-  requiredRole Role
-  status       StepStatus   @default(PENDING)
+  requiredRole String
+  status       String       @default("PENDING")
   approvedById String?
   approvedAt   DateTime?
   createdAt    DateTime     @default(now())
