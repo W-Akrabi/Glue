@@ -1,4 +1,6 @@
 import { auth, signOut } from '@/auth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -39,12 +41,9 @@ export default async function AdminWorkflowsPage() {
                   await signOut({ redirectTo: '/login' });
                 }}
               >
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 transition"
-                >
+                <Button type="submit" variant="ghost" size="sm">
                   Logout
-                </button>
+                </Button>
               </form>
             </div>
           </div>
@@ -77,42 +76,40 @@ export default async function AdminWorkflowsPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-start justify-between mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between space-y-0">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Default request workflow</h2>
-              <p className="text-sm text-gray-600">
+              <CardTitle className="text-xl font-semibold">Default request workflow</CardTitle>
+              <p className="text-sm text-muted-foreground">
                 Workflow steps are stored per organization and applied to new requests.
               </p>
             </div>
-            <button
-              type="button"
-              className="px-4 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
-            >
+            <Button type="button" variant="secondary" disabled>
               Edit workflow
-            </button>
-          </div>
-
-          {workflowSteps.length === 0 ? (
-            <div className="border rounded-lg p-4 text-sm text-gray-600">
-              No workflow steps configured for this organization.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {workflowSteps.map((step) => (
-                <div key={step.id} className="border rounded-lg p-4">
-                  <p className="text-sm text-gray-500">Step {step.stepNumber}</p>
-                  <p className="text-lg font-medium text-gray-900">
-                    {step.requiredRole} approval
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Required role: {step.requiredRole}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {workflowSteps.length === 0 ? (
+              <div className="border rounded-lg p-4 text-sm text-muted-foreground">
+                No workflow steps configured for this organization.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {workflowSteps.map((step) => (
+                  <div key={step.id} className="border rounded-lg p-4">
+                    <p className="text-sm text-muted-foreground">Step {step.stepNumber}</p>
+                    <p className="text-lg font-medium text-gray-900">
+                      {step.requiredRole} approval
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Required role: {step.requiredRole}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

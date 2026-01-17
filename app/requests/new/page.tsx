@@ -1,4 +1,9 @@
 import { auth, signOut } from '@/auth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { createRequest } from '@/lib/actions/requests';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
@@ -37,12 +42,9 @@ export default async function NewRequestPage() {
                   await signOut({ redirectTo: '/login' });
                 }}
               >
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 transition"
-                >
+                <Button type="submit" variant="ghost" size="sm">
                   Logout
-                </button>
+                </Button>
               </form>
             </div>
           </div>
@@ -89,73 +91,66 @@ export default async function NewRequestPage() {
       </nav>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Request</h2>
-          
-          <form action={createRequest} className="space-y-6">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                placeholder="e.g., Purchase new laptops"
-                data-testid="title-input"
-              />
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Create New Request</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={createRequest} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="title">
+                  Title <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  type="text"
+                  id="title"
+                  name="title"
+                  required
+                  placeholder="e.g., Purchase new laptops"
+                  data-testid="title-input"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                required
-                rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none"
-                placeholder="Provide detailed information about your request..."
-                data-testid="description-input"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">
+                  Description <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  required
+                  rows={6}
+                  placeholder="Provide detailed information about your request..."
+                  data-testid="description-input"
+                />
+              </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-blue-800 font-medium mb-2">Approval Workflow:</p>
-              {workflowSteps.length === 0 ? (
-                <p className="text-sm text-blue-700">No workflow steps configured.</p>
-              ) : (
-                <ol className="text-sm text-blue-700 space-y-1 ml-4 list-decimal">
-                  {workflowSteps.map((step) => (
-                    <li key={step.id}>
-                      Step {step.stepNumber}: {step.requiredRole} approval
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
+              <div className="rounded-lg border bg-blue-50 p-4">
+                <p className="text-sm text-blue-800 font-medium mb-2">Approval Workflow:</p>
+                {workflowSteps.length === 0 ? (
+                  <p className="text-sm text-blue-700">No workflow steps configured.</p>
+                ) : (
+                  <ol className="text-sm text-blue-700 space-y-1 ml-4 list-decimal">
+                    {workflowSteps.map((step) => (
+                      <li key={step.id}>
+                        Step {step.stepNumber}: {step.requiredRole} approval
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
 
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition"
-                data-testid="submit-request-button"
-              >
-                Submit Request
-              </button>
-              <Link
-                href="/requests"
-                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition text-center"
-                data-testid="cancel-button"
-              >
-                Cancel
-              </Link>
-            </div>
-          </form>
-        </div>
+              <div className="flex gap-4">
+                <Button type="submit" className="flex-1" data-testid="submit-request-button">
+                  Submit Request
+                </Button>
+                <Button variant="secondary" asChild className="flex-1" data-testid="cancel-button">
+                  <Link href="/requests">Cancel</Link>
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

@@ -1,5 +1,16 @@
 import { auth, signOut } from '@/auth';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { prisma } from '@/lib/prisma';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -40,12 +51,9 @@ export default async function RequestsPage() {
                   await signOut({ redirectTo: '/login' });
                 }}
               >
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 transition"
-                >
+                <Button type="submit" variant="ghost" size="sm">
                   Logout
-                </button>
+                </Button>
               </form>
             </div>
           </div>
@@ -94,90 +102,76 @@ export default async function RequestsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">All Requests</h2>
-          <Link
-            href="/requests/new"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-            data-testid="create-request-button"
-          >
-            + New Request
-          </Link>
+          <Button asChild data-testid="create-request-button">
+            <Link href="/requests/new">+ New Request</Link>
+          </Button>
         </div>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {requests.length === 0 ? (
-            <div className="px-6 py-12 text-center text-gray-500">
+            <div className="px-6 py-12 text-center text-muted-foreground">
               <p className="mb-4">No requests found</p>
-              <Link href="/requests/new" className="text-indigo-600 hover:underline">
+              <Link href="/requests/new" className="text-primary hover:underline">
                 Create your first request
               </Link>
             </div>
           ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Title
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Created By
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Progress
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Created
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Created By</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {requests.map((request) => (
-                  <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
+                  <TableRow key={request.id}>
+                    <TableCell>
                       <div className="text-sm font-medium text-gray-900">{request.title}</div>
-                      <div className="text-sm text-gray-500 line-clamp-1">{request.description}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-muted-foreground line-clamp-1">
+                        {request.description}
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       <div className="text-sm text-gray-900">{request.createdBy.name}</div>
-                      <div className="text-xs text-gray-500">{request.createdBy.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          request.status === 'PENDING'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : request.status === 'APPROVED'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
+                      <div className="text-xs text-muted-foreground">{request.createdBy.email}</div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={cn(
+                          "px-3 py-1 rounded-full text-xs font-medium",
+                          request.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-800 border-transparent"
+                            : request.status === "APPROVED"
+                            ? "bg-green-100 text-green-800 border-transparent"
+                            : "bg-red-100 text-red-800 border-transparent"
+                        )}
+                        variant="secondary"
                       >
                         {request.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
                       Step {request.currentStep} of {request.approvalSteps.length}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
                       {new Date(request.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <Link
-                        href={`/requests/${request.id}`}
-                        className="text-indigo-600 hover:text-indigo-900"
-                        data-testid={`view-request-${request.id}`}
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="text-right text-sm">
+                      <Button variant="link" asChild>
+                        <Link href={`/requests/${request.id}`} data-testid={`view-request-${request.id}`}>
+                          View
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
         </div>
       </main>
