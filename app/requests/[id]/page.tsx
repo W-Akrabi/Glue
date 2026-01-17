@@ -7,8 +7,9 @@ import { redirect } from 'next/navigation';
 export default async function RequestDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await auth();
   
   if (!session?.user) {
@@ -16,7 +17,7 @@ export default async function RequestDetailPage({
   }
 
   const request = await prisma.request.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       createdBy: true,
       organization: true,
