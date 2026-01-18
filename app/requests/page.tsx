@@ -31,18 +31,18 @@ export default async function RequestsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-black/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Glue</h1>
-              <p className="text-sm text-gray-600">Internal Tools</p>
+              <h1 className="text-2xl font-bold">Glue</h1>
+              <p className="text-sm text-gray-400">Internal Tools</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
+                <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-gray-500">{session.user.role}</p>
               </div>
               <form
@@ -60,37 +60,37 @@ export default async function RequestsPage() {
         </div>
       </header>
 
-      <nav className="bg-white border-b">
+      <nav className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             <Link
               href="/org-select"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               Organization
             </Link>
             <Link
               href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               Dashboard
             </Link>
             <Link
               href="/requests"
-              className="px-3 py-4 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600"
+              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
             >
               All Requests
             </Link>
             <Link
               href="/requests/new"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               New Request
             </Link>
             {session.user.role === 'ADMIN' && (
               <Link
                 href="/admin/workflows"
-                className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
               >
                 Workflows
               </Link>
@@ -101,13 +101,13 @@ export default async function RequestsPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">All Requests</h2>
+          <h2 className="text-2xl font-bold">All Requests</h2>
           <Button asChild data-testid="create-request-button">
             <Link href="/requests/new">+ New Request</Link>
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-neutral-900/70 border border-white/10 rounded-lg overflow-hidden">
           {requests.length === 0 ? (
             <div className="px-6 py-12 text-center text-muted-foreground">
               <p className="mb-4">No requests found</p>
@@ -131,24 +131,24 @@ export default async function RequestsPage() {
                 {requests.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell>
-                      <div className="text-sm font-medium text-gray-900">{request.title}</div>
+                      <div className="text-sm font-medium">{request.title}</div>
                       <div className="text-sm text-muted-foreground line-clamp-1">
                         {request.description}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm text-gray-900">{request.createdBy.name}</div>
+                      <div className="text-sm">{request.createdBy.name}</div>
                       <div className="text-xs text-muted-foreground">{request.createdBy.email}</div>
                     </TableCell>
                     <TableCell>
                       <Badge
                         className={cn(
-                          "px-3 py-1 rounded-full text-xs font-medium",
+                          "px-3 py-1 rounded-full text-xs font-medium border",
                           request.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-800 border-transparent"
+                            ? "bg-amber-500/10 text-amber-200 border-amber-500/30"
                             : request.status === "APPROVED"
-                            ? "bg-green-100 text-green-800 border-transparent"
-                            : "bg-red-100 text-red-800 border-transparent"
+                            ? "bg-emerald-500/10 text-emerald-200 border-emerald-500/30"
+                            : "bg-rose-500/10 text-rose-200 border-rose-500/30"
                         )}
                         variant="secondary"
                       >

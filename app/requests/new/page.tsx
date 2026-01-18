@@ -22,18 +22,18 @@ export default async function NewRequestPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-black/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Glue</h1>
-              <p className="text-sm text-gray-600">Internal Tools</p>
+              <h1 className="text-2xl font-bold">Glue</h1>
+              <p className="text-sm text-gray-400">Internal Tools</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
+                <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-gray-500">{session.user.role}</p>
               </div>
               <form
@@ -51,37 +51,37 @@ export default async function NewRequestPage() {
         </div>
       </header>
 
-      <nav className="bg-white border-b">
+      <nav className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             <Link
               href="/org-select"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               Organization
             </Link>
             <Link
               href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               Dashboard
             </Link>
             <Link
               href="/requests"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               All Requests
             </Link>
             <Link
               href="/requests/new"
-              className="px-3 py-4 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600"
+              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
             >
               New Request
             </Link>
             {session.user.role === 'ADMIN' && (
               <Link
                 href="/admin/workflows"
-                className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
               >
                 Workflows
               </Link>
@@ -91,7 +91,7 @@ export default async function NewRequestPage() {
       </nav>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card>
+        <Card className="border-white/10 bg-neutral-900/70">
           <CardHeader>
             <CardTitle>Create New Request</CardTitle>
           </CardHeader>
@@ -99,7 +99,7 @@ export default async function NewRequestPage() {
             <form action={createRequest} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">
-                  Title <span className="text-red-500">*</span>
+                  Title <span className="text-rose-400">*</span>
                 </Label>
                 <Input
                   type="text"
@@ -113,7 +113,7 @@ export default async function NewRequestPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="description">
-                  Description <span className="text-red-500">*</span>
+                  Description <span className="text-rose-400">*</span>
                 </Label>
                 <Textarea
                   id="description"
@@ -125,12 +125,12 @@ export default async function NewRequestPage() {
                 />
               </div>
 
-              <div className="rounded-lg border bg-blue-50 p-4">
-                <p className="text-sm text-blue-800 font-medium mb-2">Approval Workflow:</p>
+              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+                <p className="text-sm text-emerald-200 font-medium mb-2">Approval Workflow:</p>
                 {workflowSteps.length === 0 ? (
-                  <p className="text-sm text-blue-700">No workflow steps configured.</p>
+                  <p className="text-sm text-emerald-200/80">No workflow steps configured.</p>
                 ) : (
-                  <ol className="text-sm text-blue-700 space-y-1 ml-4 list-decimal">
+                  <ol className="text-sm text-emerald-200/80 space-y-1 ml-4 list-decimal">
                     {workflowSteps.map((step) => (
                       <li key={step.id}>
                         Step {step.stepNumber}: {step.requiredRole} approval

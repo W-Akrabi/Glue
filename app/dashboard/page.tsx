@@ -37,18 +37,18 @@ export default async function DashboardPage() {
   const canApprove = session.user.role === 'APPROVER' || session.user.role === 'ADMIN';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-black/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Glue</h1>
-              <p className="text-sm text-gray-600">Internal Tools</p>
+              <h1 className="text-2xl font-bold">Glue</h1>
+              <p className="text-sm text-gray-400">Internal Tools</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
+                <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-gray-500">{session.user.role}</p>
               </div>
               <form
@@ -66,33 +66,33 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <nav className="bg-white border-b">
+      <nav className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             <Link
               href="/org-select"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
               data-testid="nav-org-select"
             >
               Organization
             </Link>
             <Link
               href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600"
+              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
               data-testid="nav-dashboard"
             >
               Dashboard
             </Link>
             <Link
               href="/requests"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
               data-testid="nav-requests"
             >
               All Requests
             </Link>
             <Link
               href="/requests/new"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
               data-testid="nav-new-request"
             >
               New Request
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
             {session.user.role === 'ADMIN' && (
               <Link
                 href="/admin/workflows"
-                className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
                 data-testid="nav-admin-workflows"
               >
                 Workflows
@@ -113,37 +113,37 @@ export default async function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card data-testid="stat-pending">
+          <Card data-testid="stat-pending" className="border-white/10 bg-neutral-900/70">
             <CardContent className="flex items-center justify-between p-6">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600 mt-2">{pendingCount}</p>
+                <p className="text-3xl font-bold text-amber-300 mt-2">{pendingCount}</p>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-amber-500/15 rounded-full flex items-center justify-center text-amber-200">
                 <span className="text-2xl">⏳</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-approved">
+          <Card data-testid="stat-approved" className="border-white/10 bg-neutral-900/70">
             <CardContent className="flex items-center justify-between p-6">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Approved</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{approvedCount}</p>
+                <p className="text-3xl font-bold text-emerald-300 mt-2">{approvedCount}</p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500/15 rounded-full flex items-center justify-center text-emerald-200">
                 <span className="text-2xl">✓</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-rejected">
+          <Card data-testid="stat-rejected" className="border-white/10 bg-neutral-900/70">
             <CardContent className="flex items-center justify-between p-6">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Rejected</p>
-                <p className="text-3xl font-bold text-red-600 mt-2">{rejectedCount}</p>
+                <p className="text-3xl font-bold text-rose-300 mt-2">{rejectedCount}</p>
               </div>
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-rose-500/15 rounded-full flex items-center justify-center text-rose-200">
                 <span className="text-2xl">✗</span>
               </div>
             </CardContent>
@@ -151,11 +151,11 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Requests */}
-        <Card>
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Requests</h2>
+        <Card className="border-white/10 bg-neutral-900/70">
+          <div className="px-6 py-4 border-b border-white/10">
+            <h2 className="text-lg font-semibold">Recent Requests</h2>
           </div>
-          <div className="divide-y">
+          <div className="divide-y divide-white/10">
             {recentRequests.length === 0 ? (
               <div className="px-6 py-12 text-center text-muted-foreground">
                 No requests yet.{" "}
@@ -168,12 +168,12 @@ export default async function DashboardPage() {
                 <Link
                   key={request.id}
                   href={`/requests/${request.id}`}
-                  className="block px-6 py-4 hover:bg-muted/40 transition"
+                  className="block px-6 py-4 hover:bg-white/5 transition"
                   data-testid={`request-${request.id}`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{request.title}</h3>
+                      <h3 className="font-medium">{request.title}</h3>
                       <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                         {request.description}
                       </p>
@@ -191,12 +191,12 @@ export default async function DashboardPage() {
                     </div>
                     <Badge
                       className={cn(
-                        "px-3 py-1 rounded-full text-xs font-medium",
+                        "px-3 py-1 rounded-full text-xs font-medium border",
                         request.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-800 border-transparent"
+                          ? "bg-amber-500/10 text-amber-200 border-amber-500/30"
                           : request.status === "APPROVED"
-                          ? "bg-green-100 text-green-800 border-transparent"
-                          : "bg-red-100 text-red-800 border-transparent"
+                          ? "bg-emerald-500/10 text-emerald-200 border-emerald-500/30"
+                          : "bg-rose-500/10 text-rose-200 border-rose-500/30"
                       )}
                       data-testid={`status-${request.id}`}
                       variant="secondary"

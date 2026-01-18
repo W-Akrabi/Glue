@@ -66,7 +66,7 @@ export default function WorkflowEditor({ initialSteps }: WorkflowEditorProps) {
       <input type="hidden" name="steps" value={payload} />
 
       {steps.map((step, index) => (
-        <Card key={step.clientId}>
+        <Card key={step.clientId} className="border-white/10 bg-black/40">
           <CardContent className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -108,7 +108,7 @@ export default function WorkflowEditor({ initialSteps }: WorkflowEditorProps) {
               <Label htmlFor={`role-${step.clientId}`}>Required role</Label>
               <select
                 id={`role-${step.clientId}`}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="h-10 w-full rounded-md border border-white/10 bg-black px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={step.requiredRole}
                 onChange={(event) => updateRole(step.clientId, event.target.value)}
               >
@@ -129,7 +129,7 @@ export default function WorkflowEditor({ initialSteps }: WorkflowEditorProps) {
         </Button>
         <Button type="submit">Save workflow</Button>
         {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-        {state?.success && <p className="text-sm text-green-600">Workflow updated.</p>}
+        {state?.success && <p className="text-sm text-emerald-300">Workflow updated.</p>}
       </div>
     </form>
   );

@@ -23,17 +23,17 @@ export default async function AdminWorkflowsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-black text-white">
+      <header className="bg-black/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Glue</h1>
-              <p className="text-sm text-gray-600">Admin workflows</p>
+              <h1 className="text-2xl font-bold">Glue</h1>
+              <p className="text-sm text-gray-400">Admin workflows</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
+                <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-gray-500">{session.user.role}</p>
               </div>
               <form
@@ -51,24 +51,24 @@ export default async function AdminWorkflowsPage() {
         </div>
       </header>
 
-      <nav className="bg-white border-b">
+      <nav className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-8">
             <Link
               href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               Dashboard
             </Link>
             <Link
               href="/requests"
-              className="px-3 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               All Requests
             </Link>
             <Link
               href="/admin/workflows"
-              className="px-3 py-4 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600"
+              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
             >
               Workflows
             </Link>
@@ -77,7 +77,7 @@ export default async function AdminWorkflowsPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card>
+        <Card className="border-white/10 bg-neutral-900/70">
           <CardHeader className="flex flex-row items-start justify-between space-y-0">
             <div>
               <CardTitle className="text-xl font-semibold">Default request workflow</CardTitle>
