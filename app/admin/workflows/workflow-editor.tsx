@@ -39,6 +39,7 @@ export default function WorkflowEditor({
   const [entityTypeId, setEntityTypeId] = useState(
     initialEntityTypeId || entityTypes[0]?.id || ""
   );
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const [state, formAction] = useFormState(updateWorkflow, {});
 
@@ -79,6 +80,29 @@ export default function WorkflowEditor({
     });
   };
 
+  const handleDragStart = (clientId: string) => {
+    setDraggingId(clientId);
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (targetId: string) => {
+    if (!draggingId || draggingId === targetId) {
+      setDraggingId(null);
+      return;
+    }
+    const fromIndex = steps.findIndex((step) => step.clientId === draggingId);
+    const toIndex = steps.findIndex((step) => step.clientId === targetId);
+    if (fromIndex === -1 || toIndex === -1) {
+      setDraggingId(null);
+      return;
+    }
+    moveStep(fromIndex, toIndex);
+    setDraggingId(null);
+  };
+
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="steps" value={payload} />
@@ -114,7 +138,16 @@ export default function WorkflowEditor({
       </div>
 
       {steps.map((step, index) => (
-        <Card key={step.clientId} className="border-white/10 bg-black/40">
+        <Card
+          key={step.clientId}
+          className={`border-white/10 bg-black/40 transition ${
+            draggingId === step.clientId ? "ring-2 ring-emerald-500/50" : ""
+          }`}
+          draggable
+          onDragStart={() => handleDragStart(step.clientId)}
+          onDragOver={handleDragOver}
+          onDrop={() => handleDrop(step.clientId)}
+        >
           <CardContent className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -122,6 +155,7 @@ export default function WorkflowEditor({
                 <p className="text-base font-medium">Approval role</p>
               </div>
               <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 cursor-grab select-none">Drag</span>
                 <Button
                   type="button"
                   variant="secondary"

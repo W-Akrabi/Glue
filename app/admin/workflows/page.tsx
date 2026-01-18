@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import WorkflowEditor from './workflow-editor';
+import AutomationGraphEditor from './automation-graph-editor';
 
 export default async function AdminWorkflowsPage() {
   const session = await auth();
@@ -24,6 +25,11 @@ export default async function AdminWorkflowsPage() {
   });
 
   const primaryEntity = entityTypes[0];
+
+  const workflowGraph = await prisma.workflowGraph.findFirst({
+    where: { organizationId: session.user.organizationId! },
+    orderBy: { updatedAt: 'desc' },
+  });
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -110,6 +116,22 @@ export default async function AdminWorkflowsPage() {
                 initialEntityTypeId={primaryEntity?.id}
               />
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="mt-8 border-white/10 bg-neutral-900/70">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Automation graph</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Build lightweight automations that run alongside approvals.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <AutomationGraphEditor
+              initialName={workflowGraph?.name ?? 'Main Automation'}
+              initialNodes={Array.isArray(workflowGraph?.nodes) ? (workflowGraph?.nodes as any) : []}
+              initialEdges={Array.isArray(workflowGraph?.edges) ? (workflowGraph?.edges as any) : []}
+            />
           </CardContent>
         </Card>
       </main>
