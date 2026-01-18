@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import WorkflowEditor from './workflow-editor';
+import EntityTypeForm from './entity-type-form';
 
-export default async function AdminWorkflowsPage() {
+export default async function AdminEntityTypesPage() {
   const session = await auth();
 
   if (!session?.user) {
@@ -19,11 +19,8 @@ export default async function AdminWorkflowsPage() {
 
   const entityTypes = await prisma.entityType.findMany({
     where: { organizationId: session.user.organizationId! },
-    include: { workflowDefinition: true },
     orderBy: { name: 'asc' },
   });
-
-  const primaryEntity = entityTypes[0];
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -32,7 +29,7 @@ export default async function AdminWorkflowsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold">Glue</h1>
-              <p className="text-sm text-gray-400">Admin workflows</p>
+              <p className="text-sm text-gray-400">Admin entity types</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
@@ -71,13 +68,13 @@ export default async function AdminWorkflowsPage() {
             </Link>
             <Link
               href="/admin/entity-types"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
             >
               Entity Types
             </Link>
             <Link
               href="/admin/workflows"
-              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
               Workflows
             </Link>
@@ -85,30 +82,41 @@ export default async function AdminWorkflowsPage() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <Card className="border-white/10 bg-neutral-900/70">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0">
-            <div>
-              <CardTitle className="text-xl font-semibold">Workflow definitions</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Workflow steps are stored per entity type and applied to new records.
-              </p>
-            </div>
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Create entity type</CardTitle>
           </CardHeader>
           <CardContent>
+            <EntityTypeForm />
+          </CardContent>
+        </Card>
+
+        <Card className="border-white/10 bg-neutral-900/70">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Existing entity types</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {entityTypes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Create an entity type before defining workflows.
-              </p>
+              <p className="text-sm text-muted-foreground">No entity types yet.</p>
             ) : (
-              <WorkflowEditor
-                entityTypes={entityTypes.map((type) => ({
-                  id: type.id,
-                  name: type.name,
-                  steps: type.workflowDefinition?.steps ?? [],
-                }))}
-                initialEntityTypeId={primaryEntity?.id}
-              />
+              entityTypes.map((type) => (
+                <div
+                  key={type.id}
+                  className="flex items-center justify-between rounded-lg border border-white/10 bg-black/40 px-4 py-3"
+                >
+                  <div>
+                    <p className="text-sm font-medium">{type.name}</p>
+                    <p className="text-xs text-muted-foreground">ID: {type.id}</p>
+                  </div>
+                  <Link
+                    href="/admin/workflows"
+                    className="text-xs text-emerald-300 hover:text-emerald-200"
+                  >
+                    Edit workflow →
+                  </Link>
+                </div>
+              ))
             )}
           </CardContent>
         </Card>

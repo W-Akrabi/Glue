@@ -14,20 +14,19 @@ export async function GET(request: Request) {
   const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 50;
   const cursor = searchParams.get('cursor') ?? undefined;
 
-  const requests = await prisma.request.findMany({
+  const requests = await prisma.record.findMany({
     where: { organizationId: session.user.organizationId! },
     orderBy: { createdAt: 'desc' },
     take: limit,
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     select: {
       id: true,
-      title: true,
-      description: true,
+      data: true,
+      entityType: { select: { id: true, name: true, schema: true } },
       status: true,
-      currentStep: true,
+      workflowInstance: { select: { currentStep: true, steps: { select: { id: true } } } },
       createdAt: true,
       createdBy: { select: { id: true, name: true, email: true, role: true } },
-      _count: { select: { approvalSteps: true } },
     },
   });
 

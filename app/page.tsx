@@ -95,7 +95,7 @@ export default function Home() {
             <a href="#security" className="text-sm hover:text-gray-300 transition">Security</a>
             <a href="/login" className="text-sm hover:text-gray-300 transition">Sign in</a>
             <a href="/signup" className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2 rounded-full text-sm font-medium transition">
-              Start a Request
+              Start a Record
             </a>
           </div>
 
@@ -113,7 +113,7 @@ export default function Home() {
               <a href="#security" className="hover:text-gray-300 transition">Security</a>
               <a href="/login" className="hover:text-gray-300 transition">Sign in</a>
               <a href="/signup" className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2 rounded-full text-center font-medium transition">
-                Start a Request
+                Start a Record
               </a>
             </div>
           </div>
@@ -281,7 +281,7 @@ export default function Home() {
                     <span className="text-emerald-300">↓ 38%</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Requests auto-routed</span>
+                    <span className="text-gray-400">Records auto-routed</span>
                     <span className="text-emerald-300">↑ 62%</span>
                   </div>
                   <div className="flex justify-between text-sm">

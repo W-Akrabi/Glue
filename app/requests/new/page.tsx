@@ -1,13 +1,10 @@
 import { auth, signOut } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { createRequest } from '@/lib/actions/requests';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import RecordForm from './record-form';
 
 export default async function NewRequestPage() {
   const session = await auth();
@@ -16,9 +13,10 @@ export default async function NewRequestPage() {
     redirect('/login');
   }
 
-  const workflowSteps = await prisma.approvalWorkflowStep.findMany({
+  const entityTypes = await prisma.entityType.findMany({
     where: { organizationId: session.user.organizationId! },
-    orderBy: { stepNumber: 'asc' },
+    include: { workflowDefinition: true },
+    orderBy: { name: 'asc' },
   });
 
   return (
@@ -70,21 +68,29 @@ export default async function NewRequestPage() {
               href="/requests"
               className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
-              All Requests
+              Records
             </Link>
             <Link
               href="/requests/new"
               className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
             >
-              New Request
+              New Record
             </Link>
             {session.user.role === 'ADMIN' && (
-              <Link
-                href="/admin/workflows"
-                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-              >
-                Workflows
-              </Link>
+              <>
+                <Link
+                  href="/admin/entity-types"
+                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+                >
+                  Entity Types
+                </Link>
+                <Link
+                  href="/admin/workflows"
+                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+                >
+                  Workflows
+                </Link>
+              </>
             )}
           </div>
         </div>
@@ -93,62 +99,23 @@ export default async function NewRequestPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="border-white/10 bg-neutral-900/70">
           <CardHeader>
-            <CardTitle>Create New Request</CardTitle>
+            <CardTitle>Create New Record</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={createRequest} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">
-                  Title <span className="text-rose-400">*</span>
-                </Label>
-                <Input
-                  type="text"
-                  id="title"
-                  name="title"
-                  required
-                  placeholder="e.g., Purchase new laptops"
-                  data-testid="title-input"
-                />
+            {entityTypes.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                No entity types configured yet. Ask an admin to create one.
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">
-                  Description <span className="text-rose-400">*</span>
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  required
-                  rows={6}
-                  placeholder="Provide detailed information about your request..."
-                  data-testid="description-input"
-                />
-              </div>
-
-              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
-                <p className="text-sm text-emerald-200 font-medium mb-2">Approval Workflow:</p>
-                {workflowSteps.length === 0 ? (
-                  <p className="text-sm text-emerald-200/80">No workflow steps configured.</p>
-                ) : (
-                  <ol className="text-sm text-emerald-200/80 space-y-1 ml-4 list-decimal">
-                    {workflowSteps.map((step) => (
-                      <li key={step.id}>
-                        Step {step.stepNumber}: {step.requiredRole} approval
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </div>
-
-              <div className="flex gap-4">
-                <Button type="submit" className="flex-1" data-testid="submit-request-button">
-                  Submit Request
-                </Button>
-                <Button variant="secondary" asChild className="flex-1" data-testid="cancel-button">
-                  <Link href="/requests">Cancel</Link>
-                </Button>
-              </div>
-            </form>
+            ) : (
+              <RecordForm
+                entityTypes={entityTypes.map((type) => ({
+                  id: type.id,
+                  name: type.name,
+                  schema: type.schema,
+                  workflowSteps: type.workflowDefinition?.steps ?? [],
+                }))}
+              />
+            )}
           </CardContent>
         </Card>
       </main>

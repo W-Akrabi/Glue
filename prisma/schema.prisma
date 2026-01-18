@@ -20,7 +20,8 @@ model User {
   organization  Organization   @relation(fields: [organizationId], references: [id])
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  requests      Request[]      @relation("RequestCreator")
+  records       Record[]       @relation("RecordCreator")
+  approvals     WorkflowStepInstance[] @relation("WorkflowStepApprover")
   auditLogs     AuditLog[]
 
   @@map("users")
@@ -32,55 +33,81 @@ model Organization {
   inviteCode String   @unique
   createdAt DateTime  @default(now())
   users     User[]
-  requests  Request[]
-  workflowSteps ApprovalWorkflowStep[]
+  entityTypes EntityType[]
+  records  Record[]
 
   @@map("organizations")
 }
 
-model Request {
-  id             String         @id @default(cuid())
-  title          String
-  description    String
-  status         String         @default("PENDING")
-  currentStep    Int            @default(1)
-  organizationId String
-  organization   Organization   @relation(fields: [organizationId], references: [id])
-  createdById    String
-  createdBy      User           @relation("RequestCreator", fields: [createdById], references: [id])
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  approvalSteps  ApprovalStep[]
-  auditLogs      AuditLog[]
-
-  @@map("requests")
-}
-
-model ApprovalStep {
-  id           String       @id @default(cuid())
-  requestId    String
-  request      Request      @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  stepNumber   Int
-  requiredRole String
-  status       String       @default("PENDING")
-  approvedById String?
-  approvedAt   DateTime?
-  createdAt    DateTime     @default(now())
-
-  @@unique([requestId, stepNumber])
-  @@map("approval_steps")
-}
-
-model ApprovalWorkflowStep {
+model EntityType {
   id             String       @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
-  stepNumber     Int
-  requiredRole   String
+  name           String
+  schema         Json
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  workflowDefinition WorkflowDefinition?
+  records        Record[]
 
-  @@unique([organizationId, stepNumber])
-  @@map("approval_workflow_steps")
+  @@unique([organizationId, name])
+  @@map("entity_types")
+}
+
+model Record {
+  id             String       @id @default(cuid())
+  entityTypeId   String
+  entityType     EntityType   @relation(fields: [entityTypeId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  data           Json
+  status         String       @default("PENDING")
+  createdById    String
+  createdBy      User         @relation("RecordCreator", fields: [createdById], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  workflowInstance WorkflowInstance?
+
+  @@map("records")
+}
+
+model WorkflowDefinition {
+  id           String     @id @default(cuid())
+  entityTypeId String     @unique
+  entityType   EntityType @relation(fields: [entityTypeId], references: [id])
+  steps        Json
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("workflow_definitions")
+}
+
+model WorkflowInstance {
+  id          String     @id @default(cuid())
+  recordId    String     @unique
+  record      Record     @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  currentStep Int        @default(1)
+  status      String     @default("PENDING")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  steps       WorkflowStepInstance[]
+
+  @@map("workflow_instances")
+}
+
+model WorkflowStepInstance {
+  id                 String     @id @default(cuid())
+  workflowInstanceId String
+  workflowInstance   WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+  stepNumber         Int
+  status             String     @default("PENDING")
+  approvedById       String?
+  approvedBy         User?      @relation("WorkflowStepApprover", fields: [approvedById], references: [id])
+  approvedAt         DateTime?
+  createdAt          DateTime   @default(now())
+
+  @@unique([workflowInstanceId, stepNumber])
+  @@map("workflow_step_instances")
 }
 
 model AuditLog {
@@ -90,12 +117,9 @@ model AuditLog {
   action     String
   actorId    String
   actor      User     @relation(fields: [actorId], references: [id])
-  requestId  String?
-  request    Request? @relation(fields: [requestId], references: [id])
   metadata   Json?
   timestamp  DateTime @default(now())
 
   @@index([entityType, entityId])
-  @@index([requestId])
   @@map("audit_logs")
 }

@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
+import { getEntitySchema, getRecordDescription, getRecordTitle } from '@/lib/records';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -14,7 +15,7 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const stats = await prisma.request.groupBy({
+  const stats = await prisma.record.groupBy({
     by: ['status'],
     where: { organizationId: session.user.organizationId! },
     _count: true,
@@ -24,17 +25,45 @@ export default async function DashboardPage() {
   const approvedCount = stats.find((s) => s.status === 'APPROVED')?._count || 0;
   const rejectedCount = stats.find((s) => s.status === 'REJECTED')?._count || 0;
 
-  const recentRequests = await prisma.request.findMany({
+  const recentRecords = await prisma.record.findMany({
     where: { organizationId: session.user.organizationId! },
     include: {
       createdBy: { select: { name: true, email: true } },
-      approvalSteps: true,
+      entityType: { include: { workflowDefinition: true } },
+      workflowInstance: { include: { steps: true } },
     },
     orderBy: { createdAt: 'desc' },
     take: 5,
   });
 
-  const canApprove = session.user.role === 'APPROVER' || session.user.role === 'ADMIN';
+  const allRecords = await prisma.record.findMany({
+    where: { organizationId: session.user.organizationId! },
+    include: {
+      createdBy: { select: { name: true, email: true } },
+      entityType: { include: { workflowDefinition: true } },
+      workflowInstance: { include: { steps: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
+
+  const actionableRecords = allRecords.filter((record) => {
+    if (record.status !== 'PENDING') {
+      return false;
+    }
+    const steps = Array.isArray(record.entityType.workflowDefinition?.steps)
+      ? record.entityType.workflowDefinition!.steps
+      : [];
+    const currentStep = record.workflowInstance?.currentStep ?? 0;
+    const requiredRole = steps.find((step: { step?: number; role?: string }) => step.step === currentStep)?.role;
+    if (!requiredRole) {
+      return false;
+    }
+    return session.user.role === requiredRole || session.user.role === 'ADMIN';
+  });
+
+  const totalCount = pendingCount + approvedCount + rejectedCount;
+  const approvalRate = totalCount === 0 ? 0 : Math.round((approvedCount / totalCount) * 100);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -88,31 +117,126 @@ export default async function DashboardPage() {
               className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
               data-testid="nav-requests"
             >
-              All Requests
+              Records
             </Link>
             <Link
               href="/requests/new"
               className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
               data-testid="nav-new-request"
             >
-              New Request
+              New Record
             </Link>
             {session.user.role === 'ADMIN' && (
-              <Link
-                href="/admin/workflows"
-                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-                data-testid="nav-admin-workflows"
-              >
-                Workflows
-              </Link>
+              <>
+                <Link
+                  href="/admin/entity-types"
+                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+                  data-testid="nav-admin-entity-types"
+                >
+                  Entity Types
+                </Link>
+                <Link
+                  href="/admin/workflows"
+                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+                  data-testid="nav-admin-workflows"
+                >
+                  Workflows
+                </Link>
+              </>
             )}
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 border-white/10 bg-gradient-to-br from-neutral-900 to-black">
+            <CardContent className="p-8 space-y-6">
+              <div>
+                <p className="text-sm text-muted-foreground">Overview</p>
+                <h2 className="text-3xl font-semibold mt-2">Approval pipeline at a glance</h2>
+                <p className="text-sm text-gray-400 mt-2">
+                  Track the volume and momentum of approvals across all record types.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Total records</p>
+                  <p className="text-3xl font-semibold mt-2">{totalCount}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Approval rate</p>
+                  <p className="text-3xl font-semibold mt-2">{approvalRate}%</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  <span>Pending</span>
+                  <span>{pendingCount}</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-amber-400/70 rounded-full"
+                    style={{ width: totalCount === 0 ? '0%' : `${(pendingCount / totalCount) * 100}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  <span>Approved</span>
+                  <span>{approvedCount}</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-400/70 rounded-full"
+                    style={{ width: totalCount === 0 ? '0%' : `${(approvedCount / totalCount) * 100}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  <span>Rejected</span>
+                  <span>{rejectedCount}</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-rose-400/70 rounded-full"
+                    style={{ width: totalCount === 0 ? '0%' : `${(rejectedCount / totalCount) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-white/10 bg-neutral-900/70">
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <p className="text-sm text-muted-foreground">Quick actions</p>
+                <h3 className="text-xl font-semibold mt-2">Keep work moving</h3>
+              </div>
+              <div className="space-y-3">
+                <Link
+                  href="/requests/new"
+                  className="block rounded-lg border border-white/10 bg-black/50 px-4 py-3 text-sm font-medium hover:border-emerald-500/60 hover:text-emerald-200 transition"
+                >
+                  Create new record
+                </Link>
+                <Link
+                  href="/requests"
+                  className="block rounded-lg border border-white/10 bg-black/50 px-4 py-3 text-sm font-medium hover:border-emerald-500/60 hover:text-emerald-200 transition"
+                >
+                  Review all records
+                </Link>
+                {session.user.role === 'ADMIN' && (
+                  <Link
+                    href="/admin/entity-types"
+                    className="block rounded-lg border border-white/10 bg-black/50 px-4 py-3 text-sm font-medium hover:border-emerald-500/60 hover:text-emerald-200 transition"
+                  >
+                    Manage entity types
+                  </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card data-testid="stat-pending" className="border-white/10 bg-neutral-900/70">
             <CardContent className="flex items-center justify-between p-6">
               <div>
@@ -150,65 +274,116 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        {/* Recent Requests */}
-        <Card className="border-white/10 bg-neutral-900/70">
-          <div className="px-6 py-4 border-b border-white/10">
-            <h2 className="text-lg font-semibold">Recent Requests</h2>
-          </div>
-          <div className="divide-y divide-white/10">
-            {recentRequests.length === 0 ? (
-              <div className="px-6 py-12 text-center text-muted-foreground">
-                No requests yet.{" "}
-                <Link href="/requests/new" className="text-primary hover:underline">
-                  Create one
-                </Link>
-              </div>
-            ) : (
-              recentRequests.map((request) => (
-                <Link
-                  key={request.id}
-                  href={`/requests/${request.id}`}
-                  className="block px-6 py-4 hover:bg-white/5 transition"
-                  data-testid={`request-${request.id}`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-medium">{request.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                        {request.description}
-                      </p>
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className="text-xs text-muted-foreground">
-                          by {request.createdBy.name || request.createdBy.email}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(request.createdAt).toLocaleDateString()}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Step {request.currentStep} of {request.approvalSteps.length}
-                        </span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 border-white/10 bg-neutral-900/70">
+            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Recent Records</h2>
+              <Link href="/requests" className="text-xs text-emerald-300 hover:text-emerald-200">
+                View all →
+              </Link>
+            </div>
+            <div className="divide-y divide-white/10">
+              {recentRecords.length === 0 ? (
+                <div className="px-6 py-12 text-center text-muted-foreground">
+                  No records yet.{" "}
+                  <Link href="/requests/new" className="text-primary hover:underline">
+                    Create one
+                  </Link>
+                </div>
+              ) : (
+                recentRecords.map((request) => {
+                  const schema = getEntitySchema(request.entityType.schema);
+                  const data = request.data as Record<string, unknown>;
+                  const title = getRecordTitle(data, schema);
+                  const description = getRecordDescription(data, schema);
+                  const stepsTotal = request.workflowInstance?.steps.length || 0;
+
+                  return (
+                  <Link
+                    key={request.id}
+                    href={`/requests/${request.id}`}
+                    className="block px-6 py-4 hover:bg-white/5 transition"
+                    data-testid={`request-${request.id}`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                          {description}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <span className="text-xs text-muted-foreground">
+                            {request.entityType.name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            by {request.createdBy.name || request.createdBy.email}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Step {request.workflowInstance?.currentStep ?? 0} of {stepsTotal}
+                          </span>
+                        </div>
                       </div>
+                      <Badge
+                        className={cn(
+                          "px-3 py-1 rounded-full text-xs font-medium border",
+                          request.status === "PENDING"
+                            ? "bg-amber-500/10 text-amber-200 border-amber-500/30"
+                            : request.status === "APPROVED"
+                            ? "bg-emerald-500/10 text-emerald-200 border-emerald-500/30"
+                            : "bg-rose-500/10 text-rose-200 border-rose-500/30"
+                        )}
+                        data-testid={`status-${request.id}`}
+                        variant="secondary"
+                      >
+                        {request.status}
+                      </Badge>
                     </div>
-                    <Badge
-                      className={cn(
-                        "px-3 py-1 rounded-full text-xs font-medium border",
-                        request.status === "PENDING"
-                          ? "bg-amber-500/10 text-amber-200 border-amber-500/30"
-                          : request.status === "APPROVED"
-                          ? "bg-emerald-500/10 text-emerald-200 border-emerald-500/30"
-                          : "bg-rose-500/10 text-rose-200 border-rose-500/30"
-                      )}
-                      data-testid={`status-${request.id}`}
-                      variant="secondary"
+                  </Link>
+                  );
+                })
+              )}
+            </div>
+          </Card>
+
+          <Card className="border-white/10 bg-neutral-900/70">
+            <div className="px-6 py-4 border-b border-white/10">
+              <h2 className="text-lg font-semibold">Needs your approval</h2>
+              <p className="text-xs text-gray-500 mt-1">
+                {actionableRecords.length} items waiting on you
+              </p>
+            </div>
+            <div className="divide-y divide-white/10">
+              {actionableRecords.length === 0 ? (
+                <div className="px-6 py-10 text-sm text-muted-foreground">
+                  You are all caught up.
+                </div>
+              ) : (
+                actionableRecords.slice(0, 5).map((record) => {
+                  const schema = getEntitySchema(record.entityType.schema);
+                  const data = record.data as Record<string, unknown>;
+                  const title = getRecordTitle(data, schema);
+                  return (
+                    <Link
+                      key={record.id}
+                      href={`/requests/${record.id}`}
+                      className="block px-6 py-4 hover:bg-white/5 transition"
                     >
-                      {request.status}
-                    </Badge>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </Card>
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium">{title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {record.entityType.name}
+                          </p>
+                        </div>
+                        <span className="text-xs text-emerald-300">Review</span>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          </Card>
+        </div>
       </main>
     </div>
   );

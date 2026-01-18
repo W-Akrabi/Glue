@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { prisma } from '@/lib/prisma';
+import { getEntitySchema, getRecordDescription, getRecordTitle } from '@/lib/records';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -21,11 +22,12 @@ export default async function RequestsPage() {
     redirect('/login');
   }
 
-  const requests = await prisma.request.findMany({
+  const requests = await prisma.record.findMany({
     where: { organizationId: session.user.organizationId! },
     include: {
       createdBy: { select: { name: true, email: true } },
-      approvalSteps: true,
+      entityType: true,
+      workflowInstance: { include: { steps: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -79,21 +81,29 @@ export default async function RequestsPage() {
               href="/requests"
               className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
             >
-              All Requests
+              Records
             </Link>
             <Link
               href="/requests/new"
               className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
             >
-              New Request
+              New Record
             </Link>
             {session.user.role === 'ADMIN' && (
-              <Link
-                href="/admin/workflows"
-                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-              >
-                Workflows
-              </Link>
+              <>
+                <Link
+                  href="/admin/entity-types"
+                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+                >
+                  Entity Types
+                </Link>
+                <Link
+                  href="/admin/workflows"
+                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+                >
+                  Workflows
+                </Link>
+              </>
             )}
           </div>
         </div>
@@ -101,18 +111,18 @@ export default async function RequestsPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">All Requests</h2>
+          <h2 className="text-2xl font-bold">Records</h2>
           <Button asChild data-testid="create-request-button">
-            <Link href="/requests/new">+ New Request</Link>
+            <Link href="/requests/new">+ New Record</Link>
           </Button>
         </div>
 
         <div className="bg-neutral-900/70 border border-white/10 rounded-lg overflow-hidden">
           {requests.length === 0 ? (
             <div className="px-6 py-12 text-center text-muted-foreground">
-              <p className="mb-4">No requests found</p>
+              <p className="mb-4">No records found</p>
               <Link href="/requests/new" className="text-primary hover:underline">
-                Create your first request
+                Create your first record
               </Link>
             </div>
           ) : (
@@ -120,6 +130,7 @@ export default async function RequestsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Created By</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Progress</TableHead>
@@ -128,16 +139,26 @@ export default async function RequestsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {requests.map((request) => (
+                {requests.map((request) => {
+                  const schema = getEntitySchema(request.entityType.schema);
+                  const data = request.data as Record<string, unknown>;
+                  const title = getRecordTitle(data, schema);
+                  const description = getRecordDescription(data, schema);
+                  const stepsTotal = request.workflowInstance?.steps.length || 0;
+
+                  return (
                   <TableRow key={request.id}>
                     <TableCell>
-                      <div className="text-sm font-medium">{request.title}</div>
+                      <div className="text-sm font-medium">{title}</div>
                       <div className="text-sm text-muted-foreground line-clamp-1">
-                        {request.description}
+                        {description}
                       </div>
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {request.entityType.name}
+                    </TableCell>
                     <TableCell>
-                      <div className="text-sm">{request.createdBy.name}</div>
+                      <div className="text-sm">{request.createdBy.name || request.createdBy.email}</div>
                       <div className="text-xs text-muted-foreground">{request.createdBy.email}</div>
                     </TableCell>
                     <TableCell>
@@ -156,7 +177,7 @@ export default async function RequestsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      Step {request.currentStep} of {request.approvalSteps.length}
+                      Step {request.workflowInstance?.currentStep ?? 0} of {stepsTotal}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(request.createdAt).toLocaleDateString()}
@@ -169,7 +190,8 @@ export default async function RequestsPage() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}

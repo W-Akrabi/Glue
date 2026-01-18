@@ -9,9 +9,33 @@ type SignUpState = {
 };
 
 const DEFAULT_WORKFLOW = [
-  { stepNumber: 1, requiredRole: 'APPROVER' },
-  { stepNumber: 2, requiredRole: 'ADMIN' },
+  { step: 1, role: 'APPROVER' },
+  { step: 2, role: 'ADMIN' },
 ];
+
+const DEFAULT_ENTITY_SCHEMA = {
+  titleField: 'title',
+  descriptionField: 'description',
+  fields: [
+    {
+      key: 'title',
+      label: 'Title',
+      type: 'text',
+      required: true,
+      placeholder: 'Short summary',
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Describe what needs approval',
+    },
+  ],
+  permissions: {
+    createRoles: ['MEMBER', 'APPROVER', 'ADMIN'],
+  },
+};
 
 function generateInviteCode() {
   const raw = Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -56,12 +80,19 @@ export async function signUp(_prevState: SignUpState, formData: FormData) {
         },
       });
 
-      await tx.approvalWorkflowStep.createMany({
-        data: DEFAULT_WORKFLOW.map((step) => ({
+      const entityType = await tx.entityType.create({
+        data: {
+          name: 'General Request',
           organizationId: organization.id,
-          stepNumber: step.stepNumber,
-          requiredRole: step.requiredRole,
-        })),
+          schema: DEFAULT_ENTITY_SCHEMA,
+        },
+      });
+
+      await tx.workflowDefinition.create({
+        data: {
+          entityTypeId: entityType.id,
+          steps: DEFAULT_WORKFLOW,
+        },
       });
 
       await tx.user.create({

@@ -20,43 +20,51 @@ export async function GET(
 
   const { id } = await params;
 
-  const request = await prisma.request.findFirst({
+  const record = await prisma.record.findFirst({
     where: {
       id,
       organizationId: session.user.organizationId!,
     },
     select: {
       id: true,
-      title: true,
-      description: true,
+      entityTypeId: true,
+      data: true,
+      entityType: { select: { id: true, name: true, schema: true, workflowDefinition: true } },
       status: true,
-      currentStep: true,
+      workflowInstance: {
+        include: {
+          steps: {
+            orderBy: { stepNumber: 'asc' },
+            select: {
+              id: true,
+              stepNumber: true,
+              status: true,
+              approvedById: true,
+              approvedAt: true,
+              createdAt: true,
+            },
+          },
+        },
+      },
       createdAt: true,
       createdBy: { select: { id: true, name: true, email: true, role: true } },
       organization: { select: { id: true, name: true, createdAt: true } },
-      approvalSteps: {
-        orderBy: { stepNumber: 'asc' },
-        select: {
-          id: true,
-          stepNumber: true,
-          requiredRole: true,
-          status: true,
-          approvedById: true,
-          approvedAt: true,
-          createdAt: true,
-        },
-      },
-      auditLogs: {
-        take: auditLimit,
-        include: { actor: { select: { id: true, name: true, email: true, role: true } } },
-        orderBy: { timestamp: 'desc' },
-      },
     },
   });
 
-  if (!request) {
+  if (!record) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ data: request });
+  const auditLogs = await prisma.auditLog.findMany({
+    where: {
+      entityType: record.entityTypeId,
+      entityId: record.id,
+    },
+    take: auditLimit,
+    include: { actor: { select: { id: true, name: true, email: true, role: true } } },
+    orderBy: { timestamp: 'desc' },
+  });
+
+  return NextResponse.json({ data: { ...record, auditLogs } });
 }

@@ -2,6 +2,8 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+import { getWorkflowSteps } from '@/lib/records';
 
 const ALLOWED_ROLES = new Set(['MEMBER', 'APPROVER', 'ADMIN']);
 
@@ -20,14 +22,19 @@ export async function updateWorkflow(_prevState: WorkflowState, formData: FormDa
     return { error: 'Forbidden' };
   }
 
+  const entityTypeId = String(formData.get('entityTypeId') || '').trim();
+  if (!entityTypeId) {
+    return { error: 'Entity type is required' };
+  }
+
   const rawSteps = formData.get('steps');
   if (typeof rawSteps !== 'string') {
     return { error: 'Invalid payload' };
   }
 
-  let parsed: Array<{ requiredRole: string }> = [];
+  let parsed: Array<{ role: string; step: number }> = [];
   try {
-    parsed = JSON.parse(rawSteps) as Array<{ requiredRole: string }>;
+    parsed = JSON.parse(rawSteps) as Array<{ role: string; step: number }>;
   } catch {
     return { error: 'Invalid payload' };
   }
@@ -36,30 +43,36 @@ export async function updateWorkflow(_prevState: WorkflowState, formData: FormDa
     return { error: 'At least one step is required' };
   }
 
-  const steps = parsed.map((step, index) => ({
-    stepNumber: index + 1,
-    requiredRole: String(step.requiredRole || '').toUpperCase(),
-  }));
+  const steps = getWorkflowSteps(parsed);
+  if (steps.length === 0) {
+    return { error: 'At least one valid step is required' };
+  }
 
   for (const step of steps) {
-    if (!ALLOWED_ROLES.has(step.requiredRole)) {
-      return { error: `Invalid role: ${step.requiredRole}` };
+    if (!ALLOWED_ROLES.has(step.role)) {
+      return { error: `Invalid role: ${step.role}` };
     }
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.approvalWorkflowStep.deleteMany({
-      where: { organizationId: session.user.organizationId! },
-    });
-
-    await tx.approvalWorkflowStep.createMany({
-      data: steps.map((step) => ({
-        organizationId: session.user.organizationId!,
-        stepNumber: step.stepNumber,
-        requiredRole: step.requiredRole,
-      })),
-    });
+  const entityType = await prisma.entityType.findFirst({
+    where: { id: entityTypeId, organizationId: session.user.organizationId! },
   });
+
+  if (!entityType) {
+    return { error: 'Entity type not found' };
+  }
+
+  await prisma.workflowDefinition.upsert({
+    where: { entityTypeId: entityType.id },
+    update: { steps },
+    create: {
+      entityTypeId: entityType.id,
+      steps,
+    },
+  });
+
+  revalidatePath('/admin/workflows');
+  revalidatePath('/requests/new');
 
   return { success: true };
 }

@@ -26,25 +26,49 @@ async function main() {
 
   console.log('✅ Using organization:', org.name);
 
-  // Create default approval workflow steps for the organization
-  const workflowStepsInput = [
-    { organizationId: org.id, stepNumber: 1, requiredRole: 'APPROVER' },
-    { organizationId: org.id, stepNumber: 2, requiredRole: 'ADMIN' },
-  ];
-  for (const step of workflowStepsInput) {
-    await prisma.approvalWorkflowStep.upsert({
-      where: {
-        organizationId_stepNumber: {
-          organizationId: step.organizationId,
-          stepNumber: step.stepNumber,
-        },
-      },
-      update: { requiredRole: step.requiredRole },
-      create: step,
-    });
-  }
+  const defaultSchema = {
+    titleField: 'title',
+    descriptionField: 'description',
+    fields: [
+      { key: 'title', label: 'Title', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+    ],
+    permissions: { createRoles: ['MEMBER', 'APPROVER', 'ADMIN'] },
+  };
 
-  console.log('✅ Ensured default approval workflow');
+  const entityType = await prisma.entityType.upsert({
+    where: {
+      organizationId_name: {
+        organizationId: org.id,
+        name: 'General Request',
+      },
+    },
+    update: { schema: defaultSchema },
+    create: {
+      name: 'General Request',
+      organizationId: org.id,
+      schema: defaultSchema,
+    },
+  });
+
+  await prisma.workflowDefinition.upsert({
+    where: { entityTypeId: entityType.id },
+    update: {
+      steps: [
+        { step: 1, role: 'APPROVER' },
+        { step: 2, role: 'ADMIN' },
+      ],
+    },
+    create: {
+      entityTypeId: entityType.id,
+      steps: [
+        { step: 1, role: 'APPROVER' },
+        { step: 2, role: 'ADMIN' },
+      ],
+    },
+  });
+
+  console.log('✅ Ensured default entity type and workflow definition');
 
   // Hash passwords
   const hashedPassword = await bcrypt.hash('password123', 10);
@@ -106,34 +130,43 @@ async function main() {
   console.log('  - Approver:', approver.email, '(password: password123)');
   console.log('  - Member:', member.email, '(password: password123)');
 
-  const workflowSteps = await prisma.approvalWorkflowStep.findMany({
-    where: { organizationId: org.id },
-    orderBy: { stepNumber: 'asc' },
+  const workflowSteps = await prisma.workflowDefinition.findUnique({
+    where: { entityTypeId: entityType.id },
   });
 
-  // Create sample request with approval steps
-  const existingRequest = await prisma.request.findFirst({
+  const steps = Array.isArray(workflowSteps?.steps) ? workflowSteps!.steps : [];
+
+  // Create sample record with workflow instance
+  const existingRequest = await prisma.record.findFirst({
     where: {
       organizationId: org.id,
       createdById: member.id,
-      title: 'Purchase new laptops',
+      entityTypeId: entityType.id,
     },
   });
 
   const request =
     existingRequest ||
-    (await prisma.request.create({
+    (await prisma.record.create({
       data: {
-        title: 'Purchase new laptops',
-        description: 'Need to purchase 5 new MacBook Pros for the development team',
+        data: {
+          title: 'Purchase new laptops',
+          description: 'Need to purchase 5 new MacBook Pros for the development team',
+        },
         organizationId: org.id,
         createdById: member.id,
-        approvalSteps: {
-          create: workflowSteps.map((step) => ({
-            stepNumber: step.stepNumber,
-            requiredRole: step.requiredRole,
+        entityTypeId: entityType.id,
+        workflowInstance: {
+          create: {
+            currentStep: 1,
             status: 'PENDING',
-          })),
+            steps: {
+              create: steps.map((step: { step: number; role: string }) => ({
+                stepNumber: step.step,
+                status: 'PENDING',
+              })),
+            },
+          },
         },
       },
     }));
@@ -150,17 +183,16 @@ async function main() {
   if (!existingAudit) {
     await prisma.auditLog.create({
       data: {
-        entityType: 'REQUEST',
-        entityId: request.id,
-        action: 'CREATED',
-        actorId: member.id,
-        requestId: request.id,
-        metadata: { title: request.title },
-      },
-    });
-  }
+      entityType: entityType.id,
+      entityId: request.id,
+      action: 'CREATED',
+      actorId: member.id,
+      metadata: { entityTypeName: entityType.name },
+    },
+  });
+}
 
-  console.log('✅ Ensured sample request:', request.title);
+  console.log('✅ Ensured sample record:', request.id);
   console.log('\n🎉 Seeding completed!');
 }
 

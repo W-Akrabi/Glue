@@ -6,45 +6,63 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { updateWorkflow } from "@/lib/actions/workflows";
+import { getWorkflowSteps } from "@/lib/records";
 
 type StepItem = {
   clientId: string;
-  requiredRole: string;
+  role: string;
 };
 
 type WorkflowEditorProps = {
-  initialSteps: Array<{ id: string; requiredRole: string }>;
+  entityTypes: Array<{ id: string; name: string; steps: unknown }>;
+  initialEntityTypeId?: string;
 };
 
 const ROLE_OPTIONS = ["MEMBER", "APPROVER", "ADMIN"] as const;
 
-export default function WorkflowEditor({ initialSteps }: WorkflowEditorProps) {
-  const [steps, setSteps] = useState<StepItem[]>(
-    initialSteps.length
-      ? initialSteps.map((step) => ({
-          clientId: step.id,
-          requiredRole: step.requiredRole,
-        }))
-      : [{ clientId: crypto.randomUUID(), requiredRole: "APPROVER" }]
+export default function WorkflowEditor({
+  entityTypes,
+  initialEntityTypeId,
+}: WorkflowEditorProps) {
+  const [steps, setSteps] = useState<StepItem[]>(() => {
+    const initialType =
+      entityTypes.find((type) => type.id === initialEntityTypeId) ?? entityTypes[0];
+    const parsed = getWorkflowSteps(initialType?.steps ?? []);
+    if (parsed.length === 0) {
+      return [{ clientId: crypto.randomUUID(), role: "APPROVER" }];
+    }
+    return parsed.map((step) => ({
+      clientId: crypto.randomUUID(),
+      role: step.role,
+    }));
+  });
+  const [entityTypeId, setEntityTypeId] = useState(
+    initialEntityTypeId || entityTypes[0]?.id || ""
   );
 
   const [state, formAction] = useFormState(updateWorkflow, {});
 
   const payload = useMemo(
-    () => JSON.stringify(steps.map((step) => ({ requiredRole: step.requiredRole }))),
+    () =>
+      JSON.stringify(
+        steps.map((step, index) => ({
+          step: index + 1,
+          role: step.role,
+        }))
+      ),
     [steps]
   );
 
-  const updateRole = (clientId: string, requiredRole: string) => {
+  const updateRole = (clientId: string, role: string) => {
     setSteps((prev) =>
-      prev.map((step) => (step.clientId === clientId ? { ...step, requiredRole } : step))
+      prev.map((step) => (step.clientId === clientId ? { ...step, role } : step))
     );
   };
 
   const addStep = () => {
     setSteps((prev) => [
       ...prev,
-      { clientId: crypto.randomUUID(), requiredRole: "APPROVER" },
+      { clientId: crypto.randomUUID(), role: "APPROVER" },
     ]);
   };
 
@@ -64,6 +82,36 @@ export default function WorkflowEditor({ initialSteps }: WorkflowEditorProps) {
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="steps" value={payload} />
+      <input type="hidden" name="entityTypeId" value={entityTypeId} />
+
+      <div className="space-y-2">
+        <Label htmlFor="entity-type">Entity type</Label>
+        <select
+          id="entity-type"
+          className="h-10 w-full rounded-md border border-white/10 bg-black px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          value={entityTypeId}
+          onChange={(event) => {
+            const nextId = event.target.value;
+            setEntityTypeId(nextId);
+            const nextType = entityTypes.find((type) => type.id === nextId);
+            const parsed = getWorkflowSteps(nextType?.steps ?? []);
+            setSteps(
+              parsed.length === 0
+                ? [{ clientId: crypto.randomUUID(), role: "APPROVER" }]
+                : parsed.map((step) => ({
+                    clientId: crypto.randomUUID(),
+                    role: step.role,
+                  }))
+            );
+          }}
+        >
+          {entityTypes.map((type) => (
+            <option key={type.id} value={type.id}>
+              {type.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {steps.map((step, index) => (
         <Card key={step.clientId} className="border-white/10 bg-black/40">
@@ -109,7 +157,7 @@ export default function WorkflowEditor({ initialSteps }: WorkflowEditorProps) {
               <select
                 id={`role-${step.clientId}`}
                 className="h-10 w-full rounded-md border border-white/10 bg-black px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                value={step.requiredRole}
+                value={step.role}
                 onChange={(event) => updateRole(step.clientId, event.target.value)}
               >
                 {ROLE_OPTIONS.map((role) => (
