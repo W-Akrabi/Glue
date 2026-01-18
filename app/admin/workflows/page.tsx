@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import WorkflowEditor from './workflow-editor';
 
 export default async function AdminWorkflowsPage() {
   const session = await auth();
@@ -84,30 +85,9 @@ export default async function AdminWorkflowsPage() {
                 Workflow steps are stored per organization and applied to new requests.
               </p>
             </div>
-            <Button type="button" variant="secondary" disabled>
-              Edit workflow
-            </Button>
           </CardHeader>
           <CardContent>
-            {workflowSteps.length === 0 ? (
-              <div className="border rounded-lg p-4 text-sm text-muted-foreground">
-                No workflow steps configured for this organization.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {workflowSteps.map((step) => (
-                  <div key={step.id} className="border rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">Step {step.stepNumber}</p>
-                    <p className="text-lg font-medium text-gray-900">
-                      {step.requiredRole} approval
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Required role: {step.requiredRole}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+            <WorkflowEditor initialSteps={workflowSteps} />
           </CardContent>
         </Card>
       </main>
