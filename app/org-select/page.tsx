@@ -64,11 +64,16 @@ export default async function OrgSelectPage() {
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Available organizations</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="border rounded-lg p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Organization</p>
                 <p className="text-lg font-medium text-gray-900">{organization.name}</p>
+                {session.user.role === 'ADMIN' && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Invite code: <span className="font-medium text-gray-900">{organization.inviteCode}</span>
+                  </p>
+                )}
               </div>
               <Button asChild>
                 <Link href="/dashboard">Continue</Link>

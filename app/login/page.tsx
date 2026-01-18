@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -97,6 +98,12 @@ export default function LoginPage() {
             <p>Admin: admin@acme.com</p>
             <p className="pt-1">Password: password123</p>
           </div>
+          <p className="text-sm text-muted-foreground pt-3">
+            New here?{" "}
+            <Link href="/signup" className="text-primary hover:underline">
+              Create an account
+            </Link>
+          </p>
         </CardFooter>
       </Card>
     </div>

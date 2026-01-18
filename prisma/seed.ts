@@ -6,6 +6,7 @@ async function main() {
 
   // Create or reuse organization
   const orgName = 'Acme Corp';
+  const orgInviteCode = 'ACME-1234';
   let org = await prisma.organization.findFirst({
     where: { name: orgName },
   });
@@ -13,7 +14,13 @@ async function main() {
     org = await prisma.organization.create({
       data: {
         name: orgName,
+        inviteCode: orgInviteCode,
       },
+    });
+  } else if (!org.inviteCode) {
+    org = await prisma.organization.update({
+      where: { id: org.id },
+      data: { inviteCode: orgInviteCode },
     });
   }
 
