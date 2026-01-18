@@ -148,7 +148,7 @@ async function main() {
         action: 'CREATED',
         actorId: member.id,
         requestId: request.id,
-        metadata: JSON.stringify({ title: request.title }),
+        metadata: { title: request.title },
       },
     });
   }

@@ -51,7 +51,7 @@ export async function createRequest(formData: FormData) {
         action: 'CREATED',
         actorId: session.user.id,
         requestId: request.id,
-        metadata: JSON.stringify({ title }),
+        metadata: { title },
       },
     });
 
@@ -120,7 +120,7 @@ export async function approveRequest(requestId: string) {
           action: 'APPROVED',
           actorId: session.user.id,
           requestId: requestId,
-          metadata: JSON.stringify({ step: request.currentStep }),
+          metadata: { step: request.currentStep },
         },
       }),
     ]);
@@ -185,7 +185,7 @@ export async function rejectRequest(requestId: string, reason?: string) {
           action: 'REJECTED',
           actorId: session.user.id,
           requestId: requestId,
-          metadata: JSON.stringify({ step: request.currentStep, reason }),
+          metadata: { step: request.currentStep, reason },
         },
       }),
     ]);
