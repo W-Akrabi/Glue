@@ -3,7 +3,6 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getCreateRoles, getEntitySchema, getWorkflowSteps } from '@/lib/records';
-import { runAutomationGraph } from '@/lib/automation/runner';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -88,13 +87,6 @@ export async function createRecord(formData: FormData) {
         actorId: session.user.id,
         metadata: { entityTypeName: entityType.name },
       },
-    });
-
-    await runAutomationGraph({
-      organizationId: session.user.organizationId!,
-      recordId: record.id,
-      actorId: session.user.id,
-      event: 'record.created',
     });
 
     revalidatePath('/requests');
@@ -187,13 +179,6 @@ export async function approveRecord(recordId: string) {
       }),
     ]);
 
-    await runAutomationGraph({
-      organizationId: record.organizationId,
-      recordId: record.id,
-      actorId: session.user.id,
-      event: 'record.approved',
-    });
-
     revalidatePath(`/requests/${recordId}`);
     revalidatePath('/requests');
     revalidatePath('/dashboard');
@@ -275,13 +260,6 @@ export async function rejectRecord(recordId: string, reason?: string) {
         },
       }),
     ]);
-
-    await runAutomationGraph({
-      organizationId: record.organizationId,
-      recordId: record.id,
-      actorId: session.user.id,
-      event: 'record.rejected',
-    });
 
     revalidatePath(`/requests/${recordId}`);
     revalidatePath('/requests');
