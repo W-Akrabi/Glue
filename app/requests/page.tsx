@@ -17,6 +17,7 @@ import {
   getRecordStatusBadgeClasses,
   getRecordStatusLabel,
 } from '@/lib/records/status';
+import { getOverdueLabel } from '@/lib/records/sla';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -97,12 +98,14 @@ export default async function RequestsPage() {
             >
               Records
             </Link>
-            <Link
-              href="/requests/new"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              New Record
-            </Link>
+            {session.user.role !== 'VIEWER' ? (
+              <Link
+                href="/requests/new"
+                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+              >
+                New Record
+              </Link>
+            ) : null}
             {session.user.role === 'ADMIN' && (
               <>
                 <Link
@@ -173,6 +176,7 @@ export default async function RequestsPage() {
                     .map((id) => orgUserMap.get(id))
                     .filter(Boolean)
                     .map((user) => user?.name || user?.email);
+                  const overdueLabel = getOverdueLabel(currentStepInstance?.dueAt ?? null);
                   const requiredRole = steps.find(
                     (step: { step?: number; role?: string }) =>
                       step.step === request.workflowInstance?.currentStep
@@ -211,6 +215,7 @@ export default async function RequestsPage() {
                             : requiredRole
                         )}
                       </p>
+                      {overdueLabel ? <p className="mt-1 text-xs text-rose-200">{overdueLabel}</p> : null}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       Step {request.workflowInstance?.currentStep ?? 0} of {stepsTotal}

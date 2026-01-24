@@ -11,6 +11,7 @@ import {
   getRecordStatusLabel,
   isPendingApprovalStatus,
 } from '@/lib/records/status';
+import { getOverdueLabel } from '@/lib/records/sla';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -54,6 +55,12 @@ export default async function DashboardPage() {
     },
     orderBy: { createdAt: 'desc' },
     take: 50,
+  });
+
+  const notifications = await prisma.notification.findMany({
+    where: { userId: session.user.id, readAt: null },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
   });
 
   const orgUsers = await prisma.user.findMany({
@@ -144,13 +151,15 @@ export default async function DashboardPage() {
             >
               Records
             </Link>
-            <Link
-              href="/requests/new"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-              data-testid="nav-new-request"
-            >
-              New Record
-            </Link>
+            {session.user.role !== 'VIEWER' ? (
+              <Link
+                href="/requests/new"
+                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+                data-testid="nav-new-request"
+              >
+                New Record
+              </Link>
+            ) : null}
             {session.user.role === 'ADMIN' && (
               <>
                 <Link
@@ -336,6 +345,7 @@ export default async function DashboardPage() {
                     .map((id) => orgUserMap.get(id))
                     .filter(Boolean)
                     .map((user) => user?.name || user?.email);
+                  const overdueLabel = getOverdueLabel(currentStepInstance?.dueAt ?? null);
 
                   return (
                   <Link
@@ -382,11 +392,40 @@ export default async function DashboardPage() {
                                   ?.role
                           )}
                         </p>
+                        {overdueLabel ? <p className="mt-1 text-xs text-rose-200">{overdueLabel}</p> : null}
                       </div>
                     </div>
                   </Link>
                   );
                 })
+              )}
+            </div>
+          </Card>
+
+          <Card className="border-white/10 bg-neutral-900/70">
+            <div className="px-6 py-4 border-b border-white/10">
+              <h2 className="text-lg font-semibold">Notifications</h2>
+              <p className="text-xs text-gray-500 mt-1">Latest SLA reminders</p>
+            </div>
+            <div className="divide-y divide-white/10">
+              {notifications.length === 0 ? (
+                <div className="px-6 py-10 text-sm text-muted-foreground">
+                  No new notifications.
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <Link
+                    key={notification.id}
+                    href={notification.recordId ? `/requests/${notification.recordId}` : '/requests'}
+                    className="block px-6 py-4 hover:bg-white/5 transition"
+                  >
+                    <p className="text-sm font-medium">{notification.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{notification.body}</p>
+                    <p className="text-[10px] text-gray-500 mt-2">
+                      {new Date(notification.createdAt).toLocaleString()}
+                    </p>
+                  </Link>
+                ))
               )}
             </div>
           </Card>

@@ -103,6 +103,9 @@ export default function LoginPage() {
               Create an account
             </Link>
           </p>
+          <Button asChild variant="ghost" className="mt-2">
+            <Link href="/">Back to home</Link>
+          </Button>
         </CardFooter>
       </Card>
     </div>

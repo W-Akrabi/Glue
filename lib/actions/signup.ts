@@ -8,10 +8,7 @@ type SignUpState = {
   error?: string;
 };
 
-const DEFAULT_WORKFLOW = [
-  { step: 1, role: 'MEMBER' },
-  { step: 2, role: 'ADMIN' },
-];
+const DEFAULT_WORKFLOW = [{ step: 1, role: 'ADMIN', approverIds: [] }];
 
 const DEFAULT_ENTITY_SCHEMA = {
   titleField: 'title',
@@ -88,20 +85,20 @@ export async function signUp(_prevState: SignUpState, formData: FormData) {
         },
       });
 
-      await tx.workflowDefinition.create({
-        data: {
-          entityTypeId: entityType.id,
-          steps: DEFAULT_WORKFLOW,
-        },
-      });
-
-      await tx.user.create({
+      const adminUser = await tx.user.create({
         data: {
           name,
           email,
           password: hashedPassword,
           role: 'ADMIN',
           organizationId: organization.id,
+        },
+      });
+
+      await tx.workflowDefinition.create({
+        data: {
+          entityTypeId: entityType.id,
+          steps: [{ step: 1, role: 'ADMIN', approverIds: [adminUser.id] }],
         },
       });
     });

@@ -11,6 +11,7 @@ import {
   getRecordStatusLabel,
   isPendingApprovalStatus,
 } from '@/lib/records/status';
+import { getOverdueLabel } from '@/lib/records/sla';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import ApprovalActions from './approval-actions';
@@ -77,6 +78,7 @@ export default async function RequestDetailPage({
     currentStep &&
     requiredRole === session.user.role &&
     currentApproverIds.includes(session.user.id);
+  const overdueLabel = getOverdueLabel(currentStep?.dueAt);
 
   const schema = getEntitySchema(request.entityType.schema);
   const data = request.data as Record<string, unknown>;
@@ -143,12 +145,14 @@ export default async function RequestDetailPage({
             >
               Records
             </Link>
-            <Link
-              href="/requests/new"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              New Record
-            </Link>
+            {session.user.role !== 'VIEWER' ? (
+              <Link
+                href="/requests/new"
+                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+              >
+                New Record
+              </Link>
+            ) : null}
             {session.user.role === 'ADMIN' && (
               <>
                 <Link
@@ -205,6 +209,7 @@ export default async function RequestDetailPage({
                       : requiredRole
                   )}
                 </p>
+                {overdueLabel ? <p className="mt-1 text-xs text-rose-200">{overdueLabel}</p> : null}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>

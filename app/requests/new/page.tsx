@@ -12,6 +12,9 @@ export default async function NewRequestPage() {
   if (!session?.user) {
     redirect('/login');
   }
+  if (session.user.role === 'VIEWER') {
+    redirect('/requests');
+  }
 
   const entityTypes = await prisma.entityType.findMany({
     where: { organizationId: session.user.organizationId! },

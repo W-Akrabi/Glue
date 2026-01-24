@@ -22,6 +22,9 @@ export type WorkflowStepDefinition = {
   step: number;
   role: string;
   approverIds?: string[];
+  slaHours?: number;
+  escalationUserIds?: string[];
+  autoEscalate?: boolean;
 };
 
 export function getEntitySchema(raw: unknown): EntityTypeSchema {
@@ -51,6 +54,15 @@ export function getWorkflowSteps(raw: unknown): WorkflowStepDefinition[] {
       approverIds: Array.isArray((step as WorkflowStepDefinition).approverIds)
         ? (step as WorkflowStepDefinition).approverIds!.map((id) => String(id)).filter(Boolean)
         : [],
+      slaHours: Number.isFinite(Number((step as WorkflowStepDefinition).slaHours))
+        ? Number((step as WorkflowStepDefinition).slaHours)
+        : undefined,
+      escalationUserIds: Array.isArray((step as WorkflowStepDefinition).escalationUserIds)
+        ? (step as WorkflowStepDefinition).escalationUserIds!
+            .map((id) => String(id))
+            .filter(Boolean)
+        : [],
+      autoEscalate: Boolean((step as WorkflowStepDefinition).autoEscalate),
     }))
     .filter((step) => Number.isFinite(step.step) && step.step > 0 && step.role.length > 0)
     .sort((a, b) => a.step - b.step);

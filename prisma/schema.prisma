@@ -23,6 +23,7 @@ model User {
   records       Record[]       @relation("RecordCreator")
   approvals     WorkflowStepInstance[] @relation("WorkflowStepApprover")
   auditLogs     AuditLog[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -102,6 +103,9 @@ model WorkflowStepInstance {
   stepNumber         Int
   status             String     @default("PENDING")
   assignedApproverIds Json?
+  dueAt              DateTime?
+  lastSlaNotifiedAt  DateTime?
+  escalatedAt        DateTime?
   approvedById       String?
   approvedBy         User?      @relation("WorkflowStepApprover", fields: [approvedById], references: [id])
   approvedAt         DateTime?
@@ -123,4 +127,18 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  recordId  String?
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
+  @@map("notifications")
 }

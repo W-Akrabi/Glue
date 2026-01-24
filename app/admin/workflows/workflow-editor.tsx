@@ -11,6 +11,9 @@ type StepItem = {
   clientId: string;
   role: string;
   approverIds: string[];
+  slaHours: string;
+  escalationUserIds: string[];
+  autoEscalate: boolean;
 };
 
 type WorkflowEditorProps = {
@@ -32,13 +35,23 @@ export default function WorkflowEditor({
     const parsed = getWorkflowSteps(initialType?.steps ?? []);
     if (parsed.length === 0) {
       return [
-        { clientId: crypto.randomUUID(), role: "MEMBER", approverIds: [] },
+        {
+          clientId: crypto.randomUUID(),
+          role: "MEMBER",
+          approverIds: [],
+          slaHours: "",
+          escalationUserIds: [],
+          autoEscalate: false,
+        },
       ];
     }
     return parsed.map((step) => ({
       clientId: crypto.randomUUID(),
       role: step.role,
       approverIds: step.approverIds ?? [],
+      slaHours: step.slaHours ? String(step.slaHours) : "",
+      escalationUserIds: step.escalationUserIds ?? [],
+      autoEscalate: Boolean(step.autoEscalate),
     }));
   });
   const [entityTypeId, setEntityTypeId] = useState(
@@ -55,6 +68,9 @@ export default function WorkflowEditor({
           step: index + 1,
           role: step.role,
           approverIds: step.approverIds,
+          slaHours: step.slaHours ? Number(step.slaHours) : undefined,
+          escalationUserIds: step.escalationUserIds,
+          autoEscalate: step.autoEscalate,
         }))
       ),
     [steps]
@@ -63,7 +79,9 @@ export default function WorkflowEditor({
   const updateRole = (clientId: string, role: string) => {
     setSteps((prev) =>
       prev.map((step) =>
-        step.clientId === clientId ? { ...step, role, approverIds: [] } : step
+        step.clientId === clientId
+          ? { ...step, role, approverIds: [], escalationUserIds: [] }
+          : step
       )
     );
   };
@@ -85,10 +103,48 @@ export default function WorkflowEditor({
     );
   };
 
+  const updateSlaHours = (clientId: string, value: string) => {
+    setSteps((prev) =>
+      prev.map((step) => (step.clientId === clientId ? { ...step, slaHours: value } : step))
+    );
+  };
+
+  const toggleEscalationUser = (clientId: string, userId: string) => {
+    setSteps((prev) =>
+      prev.map((step) => {
+        if (step.clientId !== clientId) {
+          return step;
+        }
+        const exists = step.escalationUserIds.includes(userId);
+        return {
+          ...step,
+          escalationUserIds: exists
+            ? step.escalationUserIds.filter((id) => id !== userId)
+            : [...step.escalationUserIds, userId],
+        };
+      })
+    );
+  };
+
+  const toggleAutoEscalate = (clientId: string) => {
+    setSteps((prev) =>
+      prev.map((step) =>
+        step.clientId === clientId ? { ...step, autoEscalate: !step.autoEscalate } : step
+      )
+    );
+  };
+
   const addStep = () => {
     setSteps((prev) => [
       ...prev,
-      { clientId: crypto.randomUUID(), role: "MEMBER", approverIds: [] },
+      {
+        clientId: crypto.randomUUID(),
+        role: "MEMBER",
+        approverIds: [],
+        slaHours: "",
+        escalationUserIds: [],
+        autoEscalate: false,
+      },
     ]);
   };
 
@@ -146,11 +202,23 @@ export default function WorkflowEditor({
             const parsed = getWorkflowSteps(nextType?.steps ?? []);
             setSteps(
               parsed.length === 0
-                ? [{ clientId: crypto.randomUUID(), role: "MEMBER", approverIds: [] }]
+                ? [
+                    {
+                      clientId: crypto.randomUUID(),
+                      role: "MEMBER",
+                      approverIds: [],
+                      slaHours: "",
+                      escalationUserIds: [],
+                      autoEscalate: false,
+                    },
+                  ]
                 : parsed.map((step) => ({
                     clientId: crypto.randomUUID(),
                     role: step.role,
                     approverIds: step.approverIds ?? [],
+                    slaHours: step.slaHours ? String(step.slaHours) : "",
+                    escalationUserIds: step.escalationUserIds ?? [],
+                    autoEscalate: Boolean(step.autoEscalate),
                   }))
             );
           }}
@@ -263,6 +331,56 @@ export default function WorkflowEditor({
               {step.approverIds.length === 0 ? (
                 <p className="text-xs text-rose-200">Select at least one approver.</p>
               ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor={`sla-${step.clientId}`}>SLA (hours)</Label>
+              <input
+                id={`sla-${step.clientId}`}
+                type="number"
+                min="1"
+                inputMode="numeric"
+                className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+                placeholder="e.g. 48"
+                value={step.slaHours}
+                onChange={(event) => updateSlaHours(step.clientId, event.target.value)}
+              />
+              <p className="text-xs text-gray-400">Leave empty to disable SLA tracking.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Escalate to</Label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {users.map((user) => {
+                  const isChecked = step.escalationUserIds.includes(user.id);
+                  return (
+                    <label
+                      key={user.id}
+                      className="flex items-center gap-2 rounded-md border border-white/10 bg-black/30 px-3 py-2 text-xs text-gray-200"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleEscalationUser(step.clientId, user.id)}
+                        className="h-4 w-4 rounded border-white/20 bg-black text-amber-400"
+                      />
+                      <span className="flex-1">
+                        {user.name || user.email}{" "}
+                        <span className="text-gray-400">({user.role})</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              <label className="flex items-center gap-2 text-xs text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={step.autoEscalate}
+                  onChange={() => toggleAutoEscalate(step.clientId)}
+                  className="h-4 w-4 rounded border-white/20 bg-black text-amber-400"
+                />
+                Auto-escalate by adding escalation users as approvers.
+              </label>
             </div>
           </CardContent>
         </Card>

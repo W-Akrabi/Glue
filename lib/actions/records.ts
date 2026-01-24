@@ -40,6 +40,9 @@ export async function createRecord(formData: FormData) {
   if (steps.length === 0) {
     return { error: 'No workflow definition configured' };
   }
+  if (steps.some((step) => !step.approverIds || step.approverIds.length === 0)) {
+    return { error: 'Workflow steps must have assigned approvers' };
+  }
 
   const payload: Record<string, unknown> = {};
   for (const field of schema.fields) {
@@ -59,6 +62,12 @@ export async function createRecord(formData: FormData) {
   }
 
   try {
+    const now = new Date();
+    const firstStep = steps[0];
+    const firstDueAt =
+      firstStep?.slaHours && Number.isFinite(firstStep.slaHours)
+        ? new Date(now.getTime() + firstStep.slaHours * 60 * 60 * 1000)
+        : null;
     const record = await prisma.record.create({
       data: {
         entityTypeId: entityType.id,
@@ -71,10 +80,11 @@ export async function createRecord(formData: FormData) {
             currentStep: steps[0].step,
             status: 'PENDING_APPROVAL',
             steps: {
-              create: steps.map((step) => ({
+              create: steps.map((step, index) => ({
                 stepNumber: step.step,
                 status: 'PENDING',
                 assignedApproverIds: step.approverIds ?? [],
+                dueAt: index === 0 ? firstDueAt : null,
               })),
             },
           },
@@ -183,6 +193,14 @@ export async function approveRecord(
     );
     const isLastStep = currentIndex === steps.length - 1;
     const nextStep = isLastStep ? record.workflowInstance.currentStep : steps[currentIndex + 1]?.step;
+    const nextStepConfig = steps[currentIndex + 1];
+    const nextDueAt =
+      nextStepConfig?.slaHours && Number.isFinite(nextStepConfig.slaHours)
+        ? new Date(Date.now() + nextStepConfig.slaHours * 60 * 60 * 1000)
+        : null;
+    const nextStepInstance = record.workflowInstance.steps.find(
+      (step) => step.stepNumber === nextStep
+    );
 
     const approvalMetadata: Record<string, unknown> = {
       step: record.workflowInstance.currentStep,
@@ -194,7 +212,7 @@ export async function approveRecord(
       approvalMetadata.mentions = mentions;
     }
 
-    await prisma.$transaction([
+    const updates = [
       prisma.workflowStepInstance.update({
         where: { id: currentStep.id },
         data: {
@@ -223,7 +241,18 @@ export async function approveRecord(
           metadata: approvalMetadata,
         },
       }),
-    ]);
+    ];
+
+    if (!isLastStep && nextStepInstance) {
+      updates.push(
+        prisma.workflowStepInstance.update({
+          where: { id: nextStepInstance.id },
+          data: { dueAt: nextDueAt },
+        })
+      );
+    }
+
+    await prisma.$transaction(updates);
 
     revalidatePath(`/requests/${recordId}`);
     revalidatePath('/requests');

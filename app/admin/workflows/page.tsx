@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import WorkflowEditor from './workflow-editor';
 import { prisma } from '@/lib/prisma';
+import SlaRunner from './sla-runner';
 
 export default async function AdminWorkflowsPage() {
   const session = await auth();
@@ -117,6 +118,18 @@ export default async function AdminWorkflowsPage() {
                 users={orgUsers}
               />
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="mt-8 border-white/10 bg-neutral-900/70">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">SLA tracking</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Manually run SLA checks to send overdue reminders and escalate assignments.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <SlaRunner />
           </CardContent>
         </Card>
 

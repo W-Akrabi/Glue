@@ -95,13 +95,16 @@ export default function SignUpPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-col items-center gap-2">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link href="/login" className="text-primary hover:underline">
               Sign in
             </Link>
           </p>
+          <Button asChild variant="ghost">
+            <Link href="/">Back to home</Link>
+          </Button>
         </CardFooter>
       </Card>
     </div>

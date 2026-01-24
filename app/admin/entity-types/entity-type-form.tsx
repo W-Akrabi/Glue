@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useFormState } from "react-dom";
+import { useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -34,7 +33,7 @@ export default function EntityTypeForm() {
   const [createRoles, setCreateRoles] = useState<string[]>(ROLE_OPTIONS.slice());
   const [titleField, setTitleField] = useState("title");
   const [descriptionField, setDescriptionField] = useState("description");
-  const [state, formAction] = useFormState(createEntityType, {});
+  const [state, formAction] = useActionState(createEntityType, {});
 
   const fieldPayload = useMemo(
     () =>
