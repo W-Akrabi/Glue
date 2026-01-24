@@ -11,7 +11,7 @@ type EntityTypeState = {
 };
 
 const ALLOWED_FIELD_TYPES = new Set(['text', 'textarea', 'select', 'number', 'date']);
-const ALLOWED_ROLES = new Set(['MEMBER', 'APPROVER', 'ADMIN']);
+const ALLOWED_ROLES = new Set(['MEMBER', 'ADMIN']);
 
 export async function createEntityType(_prevState: EntityTypeState, formData: FormData) {
   const session = await auth();

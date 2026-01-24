@@ -21,6 +21,7 @@ export type EntityTypeSchema = {
 export type WorkflowStepDefinition = {
   step: number;
   role: string;
+  approverIds?: string[];
 };
 
 export function getEntitySchema(raw: unknown): EntityTypeSchema {
@@ -44,7 +45,12 @@ export function getWorkflowSteps(raw: unknown): WorkflowStepDefinition[] {
   return raw
     .map((step) => ({
       step: Number((step as WorkflowStepDefinition).step),
-      role: String((step as WorkflowStepDefinition).role || "").toUpperCase(),
+      role: String((step as WorkflowStepDefinition).role || "")
+        .toUpperCase()
+        .replace("APPROVER", "MEMBER"),
+      approverIds: Array.isArray((step as WorkflowStepDefinition).approverIds)
+        ? (step as WorkflowStepDefinition).approverIds!.map((id) => String(id)).filter(Boolean)
+        : [],
     }))
     .filter((step) => Number.isFinite(step.step) && step.step > 0 && step.role.length > 0)
     .sort((a, b) => a.step - b.step);

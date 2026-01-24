@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getWorkflowSteps } from '@/lib/records';
 
-const ALLOWED_ROLES = new Set(['MEMBER', 'APPROVER', 'ADMIN']);
+const ALLOWED_ROLES = new Set(['MEMBER', 'ADMIN']);
 
 type WorkflowState = {
   error?: string;
@@ -32,7 +32,7 @@ export async function updateWorkflow(_prevState: WorkflowState, formData: FormDa
     return { error: 'Invalid payload' };
   }
 
-  let parsed: Array<{ role: string; step: number }> = [];
+  let parsed: Array<{ role: string; step: number; approverIds?: string[] }> = [];
   try {
     parsed = JSON.parse(rawSteps) as Array<{ role: string; step: number }>;
   } catch {
@@ -52,6 +52,9 @@ export async function updateWorkflow(_prevState: WorkflowState, formData: FormDa
     if (!ALLOWED_ROLES.has(step.role)) {
       return { error: `Invalid role: ${step.role}` };
     }
+    if (!step.approverIds || step.approverIds.length === 0) {
+      return { error: 'Each step must have at least one approver' };
+    }
   }
 
   const entityType = await prisma.entityType.findFirst({
@@ -60,6 +63,19 @@ export async function updateWorkflow(_prevState: WorkflowState, formData: FormDa
 
   if (!entityType) {
     return { error: 'Entity type not found' };
+  }
+
+  const users = await prisma.user.findMany({
+    where: { organizationId: session.user.organizationId! },
+    select: { id: true },
+  });
+  const allowedUserIds = new Set(users.map((user) => user.id));
+  for (const step of steps) {
+    for (const approverId of step.approverIds ?? []) {
+      if (!allowedUserIds.has(approverId)) {
+        return { error: 'Invalid approver selection' };
+      }
+    }
   }
 
   await prisma.workflowDefinition.upsert({

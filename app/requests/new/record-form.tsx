@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,18 +102,25 @@ export default function RecordForm({ entityTypes }: RecordFormProps) {
       </div>
 
       <div className="flex gap-4">
-        <Button
-          type="submit"
-          className="flex-1"
-          data-testid="submit-request-button"
-          disabled={!hasWorkflow}
-        >
-          Submit Record
-        </Button>
+        <SubmitButton disabled={!hasWorkflow} />
         <Button variant="secondary" asChild className="flex-1" data-testid="cancel-button">
           <a href="/requests">Cancel</a>
         </Button>
       </div>
     </form>
+  );
+}
+
+function SubmitButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <Button
+      type="submit"
+      className="flex-1"
+      data-testid="submit-request-button"
+      disabled={disabled || pending}
+    >
+      {pending ? "Submitting…" : "Submit Record"}
+    </Button>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useFormState } from "react-dom";
+import { useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -11,29 +10,35 @@ import { getWorkflowSteps } from "@/lib/records";
 type StepItem = {
   clientId: string;
   role: string;
+  approverIds: string[];
 };
 
 type WorkflowEditorProps = {
   entityTypes: Array<{ id: string; name: string; steps: unknown }>;
   initialEntityTypeId?: string;
+  users: Array<{ id: string; name: string | null; email: string; role: string }>;
 };
 
-const ROLE_OPTIONS = ["MEMBER", "APPROVER", "ADMIN"] as const;
+const ROLE_OPTIONS = ["MEMBER", "ADMIN"] as const;
 
 export default function WorkflowEditor({
   entityTypes,
   initialEntityTypeId,
+  users,
 }: WorkflowEditorProps) {
   const [steps, setSteps] = useState<StepItem[]>(() => {
     const initialType =
       entityTypes.find((type) => type.id === initialEntityTypeId) ?? entityTypes[0];
     const parsed = getWorkflowSteps(initialType?.steps ?? []);
     if (parsed.length === 0) {
-      return [{ clientId: crypto.randomUUID(), role: "APPROVER" }];
+      return [
+        { clientId: crypto.randomUUID(), role: "MEMBER", approverIds: [] },
+      ];
     }
     return parsed.map((step) => ({
       clientId: crypto.randomUUID(),
       role: step.role,
+      approverIds: step.approverIds ?? [],
     }));
   });
   const [entityTypeId, setEntityTypeId] = useState(
@@ -41,7 +46,7 @@ export default function WorkflowEditor({
   );
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const [state, formAction] = useFormState(updateWorkflow, {});
+  const [state, formAction] = useActionState(updateWorkflow, {});
 
   const payload = useMemo(
     () =>
@@ -49,6 +54,7 @@ export default function WorkflowEditor({
         steps.map((step, index) => ({
           step: index + 1,
           role: step.role,
+          approverIds: step.approverIds,
         }))
       ),
     [steps]
@@ -56,14 +62,33 @@ export default function WorkflowEditor({
 
   const updateRole = (clientId: string, role: string) => {
     setSteps((prev) =>
-      prev.map((step) => (step.clientId === clientId ? { ...step, role } : step))
+      prev.map((step) =>
+        step.clientId === clientId ? { ...step, role, approverIds: [] } : step
+      )
+    );
+  };
+
+  const toggleApprover = (clientId: string, userId: string) => {
+    setSteps((prev) =>
+      prev.map((step) => {
+        if (step.clientId !== clientId) {
+          return step;
+        }
+        const exists = step.approverIds.includes(userId);
+        return {
+          ...step,
+          approverIds: exists
+            ? step.approverIds.filter((id) => id !== userId)
+            : [...step.approverIds, userId],
+        };
+      })
     );
   };
 
   const addStep = () => {
     setSteps((prev) => [
       ...prev,
-      { clientId: crypto.randomUUID(), role: "APPROVER" },
+      { clientId: crypto.randomUUID(), role: "MEMBER", approverIds: [] },
     ]);
   };
 
@@ -121,10 +146,11 @@ export default function WorkflowEditor({
             const parsed = getWorkflowSteps(nextType?.steps ?? []);
             setSteps(
               parsed.length === 0
-                ? [{ clientId: crypto.randomUUID(), role: "APPROVER" }]
+                ? [{ clientId: crypto.randomUUID(), role: "MEMBER", approverIds: [] }]
                 : parsed.map((step) => ({
                     clientId: crypto.randomUUID(),
                     role: step.role,
+                    approverIds: step.approverIds ?? [],
                   }))
             );
           }}
@@ -200,6 +226,43 @@ export default function WorkflowEditor({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Assigned approvers</Label>
+              {users.filter((user) => user.role === step.role).length === 0 ? (
+                <p className="text-xs text-amber-200/80">
+                  No users with role {step.role}. Add users or change the role.
+                </p>
+              ) : (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {users
+                    .filter((user) => user.role === step.role)
+                    .map((user) => {
+                    const isChecked = step.approverIds.includes(user.id);
+                    return (
+                      <label
+                        key={user.id}
+                      className="flex items-center gap-2 rounded-md border border-white/10 bg-black/30 px-3 py-2 text-xs text-gray-200"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleApprover(step.clientId, user.id)}
+                        className="h-4 w-4 rounded border-white/20 bg-black text-emerald-400"
+                      />
+                      <span className="flex-1">
+                        {user.name || user.email}{" "}
+                        <span className="text-gray-400">({user.role})</span>
+                      </span>
+                    </label>
+                    );
+                  })}
+                </div>
+              )}
+              {step.approverIds.length === 0 ? (
+                <p className="text-xs text-rose-200">Select at least one approver.</p>
+              ) : null}
             </div>
           </CardContent>
         </Card>

@@ -33,7 +33,7 @@ async function main() {
       { key: 'title', label: 'Title', type: 'text', required: true },
       { key: 'description', label: 'Description', type: 'textarea', required: true },
     ],
-    permissions: { createRoles: ['MEMBER', 'APPROVER', 'ADMIN'] },
+    permissions: { createRoles: ['MEMBER', 'ADMIN'] },
   };
 
   const entityType = await prisma.entityType.upsert({
@@ -55,14 +55,14 @@ async function main() {
     where: { entityTypeId: entityType.id },
     update: {
       steps: [
-        { step: 1, role: 'APPROVER' },
+        { step: 1, role: 'MEMBER' },
         { step: 2, role: 'ADMIN' },
       ],
     },
     create: {
       entityTypeId: entityType.id,
       steps: [
-        { step: 1, role: 'APPROVER' },
+        { step: 1, role: 'MEMBER' },
         { step: 2, role: 'ADMIN' },
       ],
     },
@@ -91,23 +91,6 @@ async function main() {
     },
   });
 
-  const approver = await prisma.user.upsert({
-    where: { email: 'approver@acme.com' },
-    update: {
-      password: hashedPassword,
-      name: 'Manager User',
-      role: 'APPROVER',
-      organizationId: org.id,
-    },
-    create: {
-      email: 'approver@acme.com',
-      password: hashedPassword,
-      name: 'Manager User',
-      role: 'APPROVER',
-      organizationId: org.id,
-    },
-  });
-
   const member = await prisma.user.upsert({
     where: { email: 'member@acme.com' },
     update: {
@@ -127,8 +110,17 @@ async function main() {
 
   console.log('✅ Created users:');
   console.log('  - Admin:', admin.email, '(password: password123)');
-  console.log('  - Approver:', approver.email, '(password: password123)');
   console.log('  - Member:', member.email, '(password: password123)');
+
+  await prisma.workflowDefinition.update({
+    where: { entityTypeId: entityType.id },
+    data: {
+      steps: [
+        { step: 1, role: 'MEMBER', approverIds: [member.id] },
+        { step: 2, role: 'ADMIN', approverIds: [admin.id] },
+      ],
+    },
+  });
 
   const workflowSteps = await prisma.workflowDefinition.findUnique({
     where: { entityTypeId: entityType.id },
@@ -156,14 +148,16 @@ async function main() {
         organizationId: org.id,
         createdById: member.id,
         entityTypeId: entityType.id,
+        status: 'PENDING_APPROVAL',
         workflowInstance: {
           create: {
             currentStep: 1,
-            status: 'PENDING',
+            status: 'PENDING_APPROVAL',
             steps: {
-              create: steps.map((step: { step: number; role: string }) => ({
+              create: steps.map((step: { step: number; role: string; approverIds?: string[] }) => ({
                 stepNumber: step.step,
                 status: 'PENDING',
+                assignedApproverIds: step.approverIds ?? [],
               })),
             },
           },

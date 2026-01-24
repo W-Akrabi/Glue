@@ -9,7 +9,7 @@ type SignUpState = {
 };
 
 const DEFAULT_WORKFLOW = [
-  { step: 1, role: 'APPROVER' },
+  { step: 1, role: 'MEMBER' },
   { step: 2, role: 'ADMIN' },
 ];
 
@@ -33,7 +33,7 @@ const DEFAULT_ENTITY_SCHEMA = {
     },
   ],
   permissions: {
-    createRoles: ['MEMBER', 'APPROVER', 'ADMIN'],
+    createRoles: ['MEMBER', 'ADMIN'],
   },
 };
 

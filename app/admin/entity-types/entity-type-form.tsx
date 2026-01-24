@@ -17,7 +17,7 @@ type FieldDraft = {
   options: string;
 };
 
-const ROLE_OPTIONS = ["MEMBER", "APPROVER", "ADMIN"] as const;
+const ROLE_OPTIONS = ["MEMBER", "ADMIN"] as const;
 
 export default function EntityTypeForm() {
   const [fields, setFields] = useState<FieldDraft[]>([

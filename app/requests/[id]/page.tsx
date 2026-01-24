@@ -3,11 +3,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
-import { approveRecord, rejectRecord } from '@/lib/actions/records';
 import { getEntitySchema, getRecordDescription, getRecordTitle, getWorkflowSteps } from '@/lib/records';
 import { cn } from '@/lib/utils';
+import {
+  getNextActionLabel,
+  getRecordStatusBadgeClasses,
+  getRecordStatusLabel,
+  isPendingApprovalStatus,
+} from '@/lib/records/status';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import ApprovalActions from './approval-actions';
 
 export default async function RequestDetailPage({
   params,
@@ -28,7 +34,11 @@ export default async function RequestDetailPage({
       organization: true,
       entityType: { include: { workflowDefinition: true } },
       workflowInstance: {
-        include: { steps: { orderBy: { stepNumber: 'asc' } } },
+        include: {
+          steps: {
+            orderBy: { stepNumber: 'asc' },
+          },
+        },
       },
     },
   });
@@ -41,17 +51,32 @@ export default async function RequestDetailPage({
     );
   }
 
+  const orgUsers = await prisma.user.findMany({
+    where: { organizationId: request.organizationId },
+    select: { id: true, name: true, email: true, role: true },
+    orderBy: { name: 'asc' },
+  });
+  const orgUserMap = new Map(orgUsers.map((user) => [user.id, user]));
+
   const workflowSteps = getWorkflowSteps(request.entityType.workflowDefinition?.steps ?? []);
   const workflowMap = new Map(workflowSteps.map((step) => [step.step, step.role]));
   const currentStep = request.workflowInstance?.steps.find(
     (step) => step.stepNumber === request.workflowInstance?.currentStep
   );
+  const currentApproverIds = Array.isArray(currentStep?.assignedApproverIds)
+    ? currentStep?.assignedApproverIds.map((id) => String(id))
+    : [];
+  const currentApproverNames = currentApproverIds
+    .map((id) => orgUserMap.get(id))
+    .filter(Boolean)
+    .map((user) => user?.name || user?.email);
 
   const requiredRole = workflowMap.get(request.workflowInstance?.currentStep || 0);
   const canApprove =
-    request.status === 'PENDING' &&
+    isPendingApprovalStatus(request.status) &&
     currentStep &&
-    ((requiredRole && session.user.role === requiredRole) || session.user.role === 'ADMIN');
+    requiredRole === session.user.role &&
+    currentApproverIds.includes(session.user.id);
 
   const schema = getEntitySchema(request.entityType.schema);
   const data = request.data as Record<string, unknown>;
@@ -165,17 +190,21 @@ export default async function RequestDetailPage({
                 <Badge
                   className={cn(
                     "px-3 py-1 rounded-full text-xs font-medium border",
-                    request.status === 'PENDING'
-                      ? 'bg-amber-500/10 text-amber-200 border-amber-500/30'
-                      : request.status === 'APPROVED'
-                      ? 'bg-emerald-500/10 text-emerald-200 border-emerald-500/30'
-                      : 'bg-rose-500/10 text-rose-200 border-rose-500/30'
+                    getRecordStatusBadgeClasses(request.status)
                   )}
                   data-testid="request-status"
                   variant="secondary"
                 >
-                  {request.status}
+                  {getRecordStatusLabel(request.status)}
                 </Badge>
+                <p className="mt-2 text-xs text-gray-400">
+                  {getNextActionLabel(
+                    request.status,
+                    currentApproverNames.length > 0
+                      ? currentApproverNames.join(', ')
+                      : requiredRole
+                  )}
+                </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -206,31 +235,13 @@ export default async function RequestDetailPage({
             </Card>
 
             {/* Approval Actions */}
-            {canApprove && (
-              <Card data-testid="approval-actions" className="border-white/10 bg-neutral-900/70">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Take Action</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                  You have permission to approve or reject this record at Step {request.workflowInstance?.currentStep}
-                  (requires {requiredRole || 'UNKNOWN'} role).
-                </p>
-                <div className="flex gap-4">
-                  <form action={approveRecord.bind(null, request.id)}>
-                    <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-black" data-testid="approve-button">
-                      ✓ Approve
-                    </Button>
-                  </form>
-                  <form action={rejectRecord.bind(null, request.id)}>
-                    <Button type="submit" className="bg-rose-500 hover:bg-rose-400 text-black" data-testid="reject-button">
-                      ✗ Reject
-                    </Button>
-                  </form>
-                </div>
-                </CardContent>
-              </Card>
-            )}
+            {canApprove ? (
+              <ApprovalActions
+                recordId={request.id}
+                currentStep={request.workflowInstance?.currentStep ?? 0}
+                requiredRole={requiredRole}
+              />
+            ) : null}
 
             {/* Audit Trail */}
             <Card className="border-white/10 bg-neutral-900/70">
@@ -238,19 +249,32 @@ export default async function RequestDetailPage({
                 <CardTitle className="text-lg font-semibold">Activity Log</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {auditLogs.map((log) => (
-                  <div key={log.id} className="flex gap-4 text-sm" data-testid={`audit-log-${log.id}`}>
-                    <div className="flex-shrink-0 w-2 h-2 bg-emerald-400 rounded-full mt-1.5"></div>
-                    <div className="flex-1">
-                      <p>
-                        <span className="font-medium">{log.actor.name}</span> {log.action.toLowerCase()} this request
-                      </p>
-                      <p className="text-muted-foreground text-xs mt-1">
-                        {new Date(log.timestamp).toLocaleString()}
-                      </p>
+                {auditLogs.map((log) => {
+                  const metadata = (log.metadata ?? {}) as Record<string, unknown>;
+                  const comment = typeof metadata.comment === 'string' ? metadata.comment : '';
+                  const mentions = Array.isArray(metadata.mentions)
+                    ? metadata.mentions.filter((mention) => typeof mention === 'string')
+                    : [];
+                  return (
+                    <div key={log.id} className="flex gap-4 text-sm" data-testid={`audit-log-${log.id}`}>
+                      <div className="flex-shrink-0 w-2 h-2 bg-emerald-400 rounded-full mt-1.5"></div>
+                      <div className="flex-1">
+                        <p>
+                          <span className="font-medium">{log.actor.name}</span> {log.action.toLowerCase()} this request
+                        </p>
+                        {comment ? <p className="mt-1 text-sm text-gray-200">{comment}</p> : null}
+                        {mentions.length > 0 ? (
+                          <p className="mt-1 text-xs text-gray-400">
+                            Mentions: {mentions.map((mention) => `@${mention}`).join(', ')}
+                          </p>
+                        ) : null}
+                        <p className="text-muted-foreground text-xs mt-1">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </CardContent>
             </Card>
           </div>
@@ -284,6 +308,18 @@ export default async function RequestDetailPage({
                         <p className="text-sm text-muted-foreground">
                           {workflowMap.get(step.stepNumber) || 'UNKNOWN'} approval
                         </p>
+                        {Array.isArray(step.assignedApproverIds) && step.assignedApproverIds.length > 0 ? (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Assigned to{" "}
+                            {step.assignedApproverIds
+                              .map((id) => orgUserMap.get(String(id)))
+                              .filter(Boolean)
+                              .map((user) => user?.name || user?.email)
+                              .join(", ")}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-amber-200/80 mt-1">Approver unassigned</p>
+                        )}
                         {step.approvedAt && (
                           <p className="text-xs text-muted-foreground mt-1">
                             {new Date(step.approvedAt).toLocaleDateString()}

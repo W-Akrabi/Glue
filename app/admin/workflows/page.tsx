@@ -23,6 +23,12 @@ export default async function AdminWorkflowsPage() {
     orderBy: { name: 'asc' },
   });
 
+  const orgUsers = await prisma.user.findMany({
+    where: { organizationId: session.user.organizationId! },
+    select: { id: true, name: true, email: true, role: true },
+    orderBy: { name: 'asc' },
+  });
+
   const primaryEntity = entityTypes[0];
 
   return (
@@ -108,6 +114,7 @@ export default async function AdminWorkflowsPage() {
                   steps: type.workflowDefinition?.steps ?? [],
                 }))}
                 initialEntityTypeId={primaryEntity?.id}
+                users={orgUsers}
               />
             )}
           </CardContent>

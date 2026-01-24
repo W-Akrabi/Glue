@@ -3,10 +3,12 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getCreateRoles, getEntitySchema, getWorkflowSteps } from '@/lib/records';
+import { extractMentions } from '@/lib/records/comments';
+import { isPendingApprovalStatus } from '@/lib/records/status';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-const ALLOWED_ROLES = new Set(['MEMBER', 'APPROVER', 'ADMIN']);
+const ALLOWED_ROLES = new Set(['MEMBER', 'ADMIN']);
 
 export async function createRecord(formData: FormData) {
   const session = await auth();
@@ -63,14 +65,16 @@ export async function createRecord(formData: FormData) {
         organizationId: session.user.organizationId!,
         createdById: session.user.id,
         data: payload,
+        status: 'PENDING_APPROVAL',
         workflowInstance: {
           create: {
             currentStep: steps[0].step,
-            status: 'PENDING',
+            status: 'PENDING_APPROVAL',
             steps: {
               create: steps.map((step) => ({
                 stepNumber: step.step,
                 status: 'PENDING',
+                assignedApproverIds: step.approverIds ?? [],
               })),
             },
           },
@@ -99,11 +103,19 @@ export async function createRecord(formData: FormData) {
   redirect('/requests');
 }
 
-export async function approveRecord(recordId: string) {
+export async function approveRecord(
+  recordId: string,
+  _prevState: { error?: string; success?: boolean },
+  formData: FormData
+) {
   const session = await auth();
   if (!session?.user) {
     return { error: 'Unauthorized' };
   }
+
+  const rawComment = String(formData.get('comment') || '').trim();
+  const comment = rawComment.length > 0 ? rawComment : undefined;
+  const mentions = comment ? extractMentions(comment) : [];
 
   try {
     const record = await prisma.record.findUnique({
@@ -116,6 +128,14 @@ export async function approveRecord(recordId: string) {
 
     if (!record || !record.workflowInstance) {
       return { error: 'Record not found' };
+    }
+
+    if (!isPendingApprovalStatus(record.status)) {
+      return { error: 'Record is not pending approval' };
+    }
+
+    if (!isPendingApprovalStatus(record.workflowInstance.status)) {
+      return { error: 'Workflow is not pending approval' };
     }
 
     const steps = getWorkflowSteps(record.entityType.workflowDefinition?.steps ?? []);
@@ -131,6 +151,10 @@ export async function approveRecord(recordId: string) {
       return { error: 'Invalid workflow state' };
     }
 
+    if (currentStep.status !== 'PENDING') {
+      return { error: 'Current step has already been resolved' };
+    }
+
     const requiredRole =
       steps.find((step) => step.step === record.workflowInstance!.currentStep)?.role || '';
 
@@ -138,7 +162,19 @@ export async function approveRecord(recordId: string) {
       return { error: 'Invalid workflow role configuration' };
     }
 
-    if (session.user.role !== requiredRole && session.user.role !== 'ADMIN') {
+    const assignedApproverIds = Array.isArray(currentStep.assignedApproverIds)
+      ? currentStep.assignedApproverIds.map((id) => String(id))
+      : [];
+
+    if (assignedApproverIds.length === 0) {
+      return { error: 'Approvers have not been assigned for this step' };
+    }
+
+    if (!assignedApproverIds.includes(session.user.id)) {
+      return { error: 'You are not assigned to this approval step' };
+    }
+
+    if (requiredRole && session.user.role !== requiredRole) {
       return { error: 'Insufficient permissions' };
     }
 
@@ -147,6 +183,16 @@ export async function approveRecord(recordId: string) {
     );
     const isLastStep = currentIndex === steps.length - 1;
     const nextStep = isLastStep ? record.workflowInstance.currentStep : steps[currentIndex + 1]?.step;
+
+    const approvalMetadata: Record<string, unknown> = {
+      step: record.workflowInstance.currentStep,
+    };
+    if (comment) {
+      approvalMetadata.comment = comment;
+    }
+    if (mentions.length > 0) {
+      approvalMetadata.mentions = mentions;
+    }
 
     await prisma.$transaction([
       prisma.workflowStepInstance.update({
@@ -160,13 +206,13 @@ export async function approveRecord(recordId: string) {
       prisma.workflowInstance.update({
         where: { id: record.workflowInstance.id },
         data: {
-          status: isLastStep ? 'APPROVED' : 'PENDING',
+          status: isLastStep ? 'APPROVED' : 'PENDING_APPROVAL',
           currentStep: nextStep ?? record.workflowInstance.currentStep,
         },
       }),
       prisma.record.update({
         where: { id: recordId },
-        data: { status: isLastStep ? 'APPROVED' : 'PENDING' },
+        data: { status: isLastStep ? 'APPROVED' : 'PENDING_APPROVAL' },
       }),
       prisma.auditLog.create({
         data: {
@@ -174,7 +220,7 @@ export async function approveRecord(recordId: string) {
           entityId: recordId,
           action: 'APPROVED',
           actorId: session.user.id,
-          metadata: { step: record.workflowInstance.currentStep },
+          metadata: approvalMetadata,
         },
       }),
     ]);
@@ -190,11 +236,21 @@ export async function approveRecord(recordId: string) {
   }
 }
 
-export async function rejectRecord(recordId: string, reason?: string) {
+export async function rejectRecord(
+  recordId: string,
+  _prevState: { error?: string; success?: boolean },
+  formData: FormData
+) {
   const session = await auth();
   if (!session?.user) {
     return { error: 'Unauthorized' };
   }
+
+  const rawComment = String(formData.get('comment') || '').trim();
+  if (!rawComment) {
+    return { error: 'Comment is required to reject.' };
+  }
+  const mentions = extractMentions(rawComment);
 
   try {
     const record = await prisma.record.findUnique({
@@ -207,6 +263,14 @@ export async function rejectRecord(recordId: string, reason?: string) {
 
     if (!record || !record.workflowInstance) {
       return { error: 'Record not found' };
+    }
+
+    if (!isPendingApprovalStatus(record.status)) {
+      return { error: 'Record is not pending approval' };
+    }
+
+    if (!isPendingApprovalStatus(record.workflowInstance.status)) {
+      return { error: 'Workflow is not pending approval' };
     }
 
     const steps = getWorkflowSteps(record.entityType.workflowDefinition?.steps ?? []);
@@ -222,6 +286,10 @@ export async function rejectRecord(recordId: string, reason?: string) {
       return { error: 'Invalid workflow state' };
     }
 
+    if (currentStep.status !== 'PENDING') {
+      return { error: 'Current step has already been resolved' };
+    }
+
     const requiredRole =
       steps.find((step) => step.step === record.workflowInstance!.currentStep)?.role || '';
 
@@ -229,8 +297,28 @@ export async function rejectRecord(recordId: string, reason?: string) {
       return { error: 'Invalid workflow role configuration' };
     }
 
-    if (session.user.role !== requiredRole && session.user.role !== 'ADMIN') {
+    const assignedApproverIds = Array.isArray(currentStep.assignedApproverIds)
+      ? currentStep.assignedApproverIds.map((id) => String(id))
+      : [];
+
+    if (assignedApproverIds.length === 0) {
+      return { error: 'Approvers have not been assigned for this step' };
+    }
+
+    if (!assignedApproverIds.includes(session.user.id)) {
+      return { error: 'You are not assigned to this approval step' };
+    }
+
+    if (requiredRole && session.user.role !== requiredRole) {
       return { error: 'Insufficient permissions' };
+    }
+
+    const rejectionMetadata: Record<string, unknown> = {
+      step: record.workflowInstance.currentStep,
+      comment: rawComment,
+    };
+    if (mentions.length > 0) {
+      rejectionMetadata.mentions = mentions;
     }
 
     await prisma.$transaction([
@@ -256,7 +344,7 @@ export async function rejectRecord(recordId: string, reason?: string) {
           entityId: recordId,
           action: 'REJECTED',
           actorId: session.user.id,
-          metadata: { step: record.workflowInstance.currentStep, reason },
+          metadata: rejectionMetadata,
         },
       }),
     ]);

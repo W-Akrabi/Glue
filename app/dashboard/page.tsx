@@ -5,6 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import { getEntitySchema, getRecordDescription, getRecordTitle } from '@/lib/records';
 import { cn } from '@/lib/utils';
+import {
+  getNextActionLabel,
+  getRecordStatusBadgeClasses,
+  getRecordStatusLabel,
+  isPendingApprovalStatus,
+} from '@/lib/records/status';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -21,7 +27,10 @@ export default async function DashboardPage() {
     _count: true,
   });
 
-  const pendingCount = stats.find((s) => s.status === 'PENDING')?._count || 0;
+  const pendingCount = stats.reduce(
+    (total, stat) => (isPendingApprovalStatus(stat.status) ? total + stat._count : total),
+    0
+  );
   const approvedCount = stats.find((s) => s.status === 'APPROVED')?._count || 0;
   const rejectedCount = stats.find((s) => s.status === 'REJECTED')?._count || 0;
 
@@ -47,8 +56,15 @@ export default async function DashboardPage() {
     take: 50,
   });
 
+  const orgUsers = await prisma.user.findMany({
+    where: { organizationId: session.user.organizationId! },
+    select: { id: true, name: true, email: true },
+    orderBy: { name: 'asc' },
+  });
+  const orgUserMap = new Map(orgUsers.map((user) => [user.id, user]));
+
   const actionableRecords = allRecords.filter((record) => {
-    if (record.status !== 'PENDING') {
+    if (!isPendingApprovalStatus(record.status)) {
       return false;
     }
     const steps = Array.isArray(record.entityType.workflowDefinition?.steps)
@@ -56,10 +72,19 @@ export default async function DashboardPage() {
       : [];
     const currentStep = record.workflowInstance?.currentStep ?? 0;
     const requiredRole = steps.find((step: { step?: number; role?: string }) => step.step === currentStep)?.role;
+    const currentStepInstance = record.workflowInstance?.steps.find(
+      (step) => step.stepNumber === currentStep
+    );
+    const assignedApproverIds = Array.isArray(currentStepInstance?.assignedApproverIds)
+      ? currentStepInstance?.assignedApproverIds.map((id) => String(id))
+      : [];
+    if (assignedApproverIds.length === 0) {
+      return false;
+    }
     if (!requiredRole) {
       return false;
     }
-    return session.user.role === requiredRole || session.user.role === 'ADMIN';
+    return session.user.role === requiredRole && assignedApproverIds.includes(session.user.id);
   });
 
   const totalCount = pendingCount + approvedCount + rejectedCount;
@@ -297,6 +322,20 @@ export default async function DashboardPage() {
                   const title = getRecordTitle(data, schema);
                   const description = getRecordDescription(data, schema);
                   const stepsTotal = request.workflowInstance?.steps.length || 0;
+                  const steps = Array.isArray(request.entityType.workflowDefinition?.steps)
+                    ? request.entityType.workflowDefinition!.steps
+                    : [];
+                  const currentStep = request.workflowInstance?.currentStep ?? 0;
+                  const currentStepInstance = request.workflowInstance?.steps.find(
+                    (step) => step.stepNumber === currentStep
+                  );
+                  const assignedApproverIds = Array.isArray(currentStepInstance?.assignedApproverIds)
+                    ? currentStepInstance?.assignedApproverIds.map((id) => String(id))
+                    : [];
+                  const assignedApproverNames = assignedApproverIds
+                    .map((id) => orgUserMap.get(id))
+                    .filter(Boolean)
+                    .map((user) => user?.name || user?.email);
 
                   return (
                   <Link
@@ -323,20 +362,27 @@ export default async function DashboardPage() {
                           </span>
                         </div>
                       </div>
-                      <Badge
-                        className={cn(
-                          "px-3 py-1 rounded-full text-xs font-medium border",
-                          request.status === "PENDING"
-                            ? "bg-amber-500/10 text-amber-200 border-amber-500/30"
-                            : request.status === "APPROVED"
-                            ? "bg-emerald-500/10 text-emerald-200 border-emerald-500/30"
-                            : "bg-rose-500/10 text-rose-200 border-rose-500/30"
-                        )}
-                        data-testid={`status-${request.id}`}
-                        variant="secondary"
-                      >
-                        {request.status}
-                      </Badge>
+                      <div className="text-right">
+                        <Badge
+                          className={cn(
+                            "px-3 py-1 rounded-full text-xs font-medium border",
+                            getRecordStatusBadgeClasses(request.status)
+                          )}
+                          data-testid={`status-${request.id}`}
+                          variant="secondary"
+                        >
+                          {getRecordStatusLabel(request.status)}
+                        </Badge>
+                        <p className="mt-1 text-xs text-gray-400">
+                          {getNextActionLabel(
+                            request.status,
+                            assignedApproverNames.length > 0
+                              ? assignedApproverNames.join(', ')
+                              : steps.find((step: { step?: number; role?: string }) => step.step === currentStep)
+                                  ?.role
+                          )}
+                        </p>
+                      </div>
                     </div>
                   </Link>
                   );

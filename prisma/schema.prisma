@@ -61,7 +61,7 @@ model Record {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   data           Json
-  status         String       @default("PENDING")
+  status         String       @default("PENDING_APPROVAL")
   createdById    String
   createdBy      User         @relation("RecordCreator", fields: [createdById], references: [id])
   createdAt      DateTime     @default(now())
@@ -87,7 +87,7 @@ model WorkflowInstance {
   recordId    String     @unique
   record      Record     @relation(fields: [recordId], references: [id], onDelete: Cascade)
   currentStep Int        @default(1)
-  status      String     @default("PENDING")
+  status      String     @default("PENDING_APPROVAL")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   steps       WorkflowStepInstance[]
@@ -101,6 +101,7 @@ model WorkflowStepInstance {
   workflowInstance   WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   stepNumber         Int
   status             String     @default("PENDING")
+  assignedApproverIds Json?
   approvedById       String?
   approvedBy         User?      @relation("WorkflowStepApprover", fields: [approvedById], references: [id])
   approvedAt         DateTime?

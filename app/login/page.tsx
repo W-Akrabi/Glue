@@ -94,7 +94,6 @@ export default function LoginPage() {
           <p className="text-sm text-muted-foreground font-medium">Demo Credentials:</p>
           <div className="space-y-1 text-xs text-muted-foreground">
             <p>Member: member@acme.com</p>
-            <p>Approver: approver@acme.com</p>
             <p>Admin: admin@acme.com</p>
             <p className="pt-1">Password: password123</p>
           </div>

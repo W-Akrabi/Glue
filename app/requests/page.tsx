@@ -12,6 +12,11 @@ import {
 import { prisma } from '@/lib/prisma';
 import { getEntitySchema, getRecordDescription, getRecordTitle } from '@/lib/records';
 import { cn } from '@/lib/utils';
+import {
+  getNextActionLabel,
+  getRecordStatusBadgeClasses,
+  getRecordStatusLabel,
+} from '@/lib/records/status';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -27,10 +32,19 @@ export default async function RequestsPage() {
     include: {
       createdBy: { select: { name: true, email: true } },
       entityType: true,
-      workflowInstance: { include: { steps: true } },
+      workflowInstance: {
+        include: { steps: true },
+      },
     },
     orderBy: { createdAt: 'desc' },
   });
+
+  const orgUsers = await prisma.user.findMany({
+    where: { organizationId: session.user.organizationId! },
+    select: { id: true, name: true, email: true },
+    orderBy: { name: 'asc' },
+  });
+  const orgUserMap = new Map(orgUsers.map((user) => [user.id, user]));
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -145,6 +159,24 @@ export default async function RequestsPage() {
                   const title = getRecordTitle(data, schema);
                   const description = getRecordDescription(data, schema);
                   const stepsTotal = request.workflowInstance?.steps.length || 0;
+                  const steps = Array.isArray(request.entityType.workflowDefinition?.steps)
+                    ? request.entityType.workflowDefinition!.steps
+                    : [];
+                  const currentStep = request.workflowInstance?.currentStep ?? 0;
+                  const currentStepInstance = request.workflowInstance?.steps.find(
+                    (step) => step.stepNumber === currentStep
+                  );
+                  const assignedApproverIds = Array.isArray(currentStepInstance?.assignedApproverIds)
+                    ? currentStepInstance?.assignedApproverIds.map((id) => String(id))
+                    : [];
+                  const assignedApproverNames = assignedApproverIds
+                    .map((id) => orgUserMap.get(id))
+                    .filter(Boolean)
+                    .map((user) => user?.name || user?.email);
+                  const requiredRole = steps.find(
+                    (step: { step?: number; role?: string }) =>
+                      step.step === request.workflowInstance?.currentStep
+                  )?.role;
 
                   return (
                   <TableRow key={request.id}>
@@ -165,16 +197,20 @@ export default async function RequestsPage() {
                       <Badge
                         className={cn(
                           "px-3 py-1 rounded-full text-xs font-medium border",
-                          request.status === "PENDING"
-                            ? "bg-amber-500/10 text-amber-200 border-amber-500/30"
-                            : request.status === "APPROVED"
-                            ? "bg-emerald-500/10 text-emerald-200 border-emerald-500/30"
-                            : "bg-rose-500/10 text-rose-200 border-rose-500/30"
+                          getRecordStatusBadgeClasses(request.status)
                         )}
                         variant="secondary"
                       >
-                        {request.status}
+                        {getRecordStatusLabel(request.status)}
                       </Badge>
+                      <p className="mt-1 text-xs text-gray-400">
+                        {getNextActionLabel(
+                          request.status,
+                          assignedApproverNames.length > 0
+                            ? assignedApproverNames.join(', ')
+                            : requiredRole
+                        )}
+                      </p>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       Step {request.workflowInstance?.currentStep ?? 0} of {stepsTotal}
