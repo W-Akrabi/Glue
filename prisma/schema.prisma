@@ -24,6 +24,7 @@ model User {
   approvals     WorkflowStepInstance[] @relation("WorkflowStepApprover")
   auditLogs     AuditLog[]
   notifications Notification[]
+  comments      Comment[]
 
   @@map("users")
 }
@@ -74,6 +75,7 @@ model Record {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   workflowInstance WorkflowInstance?
+  comments       Comment[]
 
   @@map("records")
 }
@@ -135,6 +137,23 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model Comment {
+  id        String   @id @default(cuid())
+  recordId  String
+  record    Record   @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  parentId  String?
+  parent    Comment? @relation("CommentThread", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentThread")
+  mentions  Json?
+  resolvedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([recordId, createdAt])
+  @@map("comments")
+}
 model Notification {
   id        String   @id @default(cuid())
   userId    String

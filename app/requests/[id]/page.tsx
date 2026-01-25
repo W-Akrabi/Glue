@@ -12,9 +12,11 @@ import {
   isPendingApprovalStatus,
 } from '@/lib/records/status';
 import { getOverdueLabel } from '@/lib/records/sla';
+import { resolveComment, unresolveComment } from '@/lib/actions/comments';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import ApprovalActions from './approval-actions';
+import CommentForm from './comment-form';
 
 export default async function RequestDetailPage({
   params,
@@ -100,6 +102,17 @@ export default async function RequestDetailPage({
     include: { actor: true },
     orderBy: { timestamp: 'desc' },
   });
+
+  const comments = await prisma.comment.findMany({
+    where: { recordId: request.id, parentId: null },
+    include: { author: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const timelineItems = [
+    ...auditLogs.map((log) => ({ type: 'audit' as const, createdAt: log.timestamp, log })),
+    ...comments.map((comment) => ({ type: 'comment' as const, createdAt: comment.createdAt, comment })),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -261,38 +274,106 @@ export default async function RequestDetailPage({
               />
             ) : null}
 
-            {/* Audit Trail */}
+            {/* Timeline */}
             <Card className="border-white/10 bg-neutral-900/70">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">Activity Log</CardTitle>
+                <CardTitle className="text-lg font-semibold">Timeline</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {auditLogs.map((log) => {
-                  const metadata = (log.metadata ?? {}) as Record<string, unknown>;
-                  const comment = typeof metadata.comment === 'string' ? metadata.comment : '';
-                  const mentions = Array.isArray(metadata.mentions)
-                    ? metadata.mentions.filter((mention) => typeof mention === 'string')
-                    : [];
-                  return (
-                    <div key={log.id} className="flex gap-4 text-sm" data-testid={`audit-log-${log.id}`}>
-                      <div className="flex-shrink-0 w-2 h-2 bg-emerald-400 rounded-full mt-1.5"></div>
-                      <div className="flex-1">
-                        <p>
-                          <span className="font-medium">{log.actor.name}</span> {log.action.toLowerCase()} this request
-                        </p>
-                        {comment ? <p className="mt-1 text-sm text-gray-200">{comment}</p> : null}
-                        {mentions.length > 0 ? (
-                          <p className="mt-1 text-xs text-gray-400">
-                            Mentions: {mentions.map((mention) => `@${mention}`).join(', ')}
-                          </p>
-                        ) : null}
-                        <p className="text-muted-foreground text-xs mt-1">
-                          {new Date(log.timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+              <CardContent className="space-y-6">
+                <CommentForm recordId={request.id} />
+                <div className="space-y-5">
+                  {timelineItems.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No activity yet.</p>
+                  ) : (
+                    timelineItems.map((item) => {
+                      if (item.type === 'comment') {
+                        const mentionTokens = Array.isArray(item.comment.mentions)
+                          ? item.comment.mentions.filter((mention) => typeof mention === 'string')
+                          : [];
+                        const canResolve =
+                          session.user.role === 'ADMIN' || item.comment.authorId === session.user.id;
+                        return (
+                          <div key={item.comment.id} className="flex gap-4 text-sm">
+                            <div className="flex-shrink-0 w-2 h-2 bg-sky-300 rounded-full mt-1.5"></div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <p>
+                                  <span className="font-medium">
+                                    {item.comment.author.name || item.comment.author.email}
+                                  </span>{' '}
+                                  commented
+                                </p>
+                                {item.comment.resolvedAt ? (
+                                  <Badge
+                                    className="px-2 py-0.5 text-[10px] uppercase tracking-wide bg-emerald-500/10 text-emerald-200 border border-emerald-500/30"
+                                    variant="secondary"
+                                  >
+                                    Resolved
+                                  </Badge>
+                                ) : null}
+                              </div>
+                              <p className="mt-1 text-sm text-gray-200 whitespace-pre-wrap">
+                                {item.comment.body}
+                              </p>
+                              {mentionTokens.length > 0 ? (
+                                <p className="mt-1 text-xs text-gray-400">
+                                  Mentions: {mentionTokens.map((mention) => `@${mention}`).join(', ')}
+                                </p>
+                              ) : null}
+                              <div className="mt-2 flex items-center gap-3">
+                                <p className="text-muted-foreground text-xs">
+                                  {new Date(item.comment.createdAt).toLocaleString()}
+                                </p>
+                                {canResolve ? (
+                                  item.comment.resolvedAt ? (
+                                    <form action={unresolveComment.bind(null, item.comment.id)}>
+                                      <Button variant="ghost" size="sm" className="text-xs">
+                                        Reopen
+                                      </Button>
+                                    </form>
+                                  ) : (
+                                    <form action={resolveComment.bind(null, item.comment.id)}>
+                                      <Button variant="ghost" size="sm" className="text-xs">
+                                        Resolve
+                                      </Button>
+                                    </form>
+                                  )
+                                ) : null}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const metadata = (item.log.metadata ?? {}) as Record<string, unknown>;
+                      const comment = typeof metadata.comment === 'string' ? metadata.comment : '';
+                      const mentions = Array.isArray(metadata.mentions)
+                        ? metadata.mentions.filter((mention) => typeof mention === 'string')
+                        : [];
+
+                      return (
+                        <div key={item.log.id} className="flex gap-4 text-sm" data-testid={`audit-log-${item.log.id}`}>
+                          <div className="flex-shrink-0 w-2 h-2 bg-emerald-400 rounded-full mt-1.5"></div>
+                          <div className="flex-1">
+                            <p>
+                              <span className="font-medium">{item.log.actor.name || item.log.actor.email}</span>{' '}
+                              {item.log.action.toLowerCase()} this request
+                            </p>
+                            {comment ? <p className="mt-1 text-sm text-gray-200">{comment}</p> : null}
+                            {mentions.length > 0 ? (
+                              <p className="mt-1 text-xs text-gray-400">
+                                Mentions: {mentions.map((mention) => `@${mention}`).join(', ')}
+                              </p>
+                            ) : null}
+                            <p className="text-muted-foreground text-xs mt-1">
+                              {new Date(item.log.timestamp).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
