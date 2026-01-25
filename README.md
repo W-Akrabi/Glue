@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Glue is the approvals OS for fast-moving teams. We turn messy requests into structured records, route them to the right people, and keep every decision on time with clear accountability.
 
-## Getting Started
+## Why teams buy Glue
+- Design approval flows per record type and keep them consistent across the org
+- Assign specific approvers per step (multiple users) with role-aware gates
+- Track SLAs, send overdue reminders, and escalate with one click
+- See live status, audit trails, and decision history in one place
+- Simple org pricing: $4/month with a lightweight billing gate
 
-First, run the development server:
+## Product highlights
+- Workflow builder for entity types
+- Per-step assignee lists
+- SLA tracking and in-app notifications
+- Approval comments with @mentions
+- Status clarity across dashboard and record views
 
+## Local setup
+1) Install deps
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2) Configure env
+Create `.env.local` with:
+```bash
+DATABASE_URL=postgresql://...
+AUTH_SECRET=...
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3) Migrate + seed
+```bash
+npx prisma migrate dev
+npx prisma db seed
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4) Run
+```bash
+npm run dev
+```
 
-## Learn More
+## Billing flow (dev)
+- New org signups land on `/billing`
+- Submit the in-app card form to activate subscription
+- Joiners do not pay
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notes
+- SLA checks are manual for now (Admin -> Workflows -> Run SLA check)
+- Replace the billing action with Stripe when ready
