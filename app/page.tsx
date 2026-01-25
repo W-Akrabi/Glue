@@ -93,6 +93,7 @@ export default function Home() {
             <a href="#platform" className="text-sm hover:text-gray-300 transition">Platform</a>
             <a href="#workflow" className="text-sm hover:text-gray-300 transition">Workflows</a>
             <a href="#security" className="text-sm hover:text-gray-300 transition">Security</a>
+            <a href="#pricing" className="text-sm hover:text-gray-300 transition">Pricing</a>
             <a href="/login" className="text-sm hover:text-gray-300 transition">Sign in</a>
             <a href="/signup" className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2 rounded-full text-sm font-medium transition">
               Start a Record
@@ -111,6 +112,7 @@ export default function Home() {
               <a href="#platform" className="hover:text-gray-300 transition">Platform</a>
               <a href="#workflow" className="hover:text-gray-300 transition">Workflows</a>
               <a href="#security" className="hover:text-gray-300 transition">Security</a>
+              <a href="#pricing" className="hover:text-gray-300 transition">Pricing</a>
               <a href="/login" className="hover:text-gray-300 transition">Sign in</a>
               <a href="/signup" className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2 rounded-full text-center font-medium transition">
                 Start a Record
@@ -374,6 +376,70 @@ export default function Home() {
           <p className="text-gray-400 max-w-3xl mx-auto">
             Centralize requests, assign owners, and track every decision in a single place that scales with your organization.
           </p>
+        </div>
+      </section>
+
+      <section id="pricing" className="py-32 px-6 border-t border-white/10">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-emerald-300 mb-4">Pricing</p>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6">Simple pricing for every org</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              $4 per month, billed per organization. No seat limits. Cancel anytime.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
+            <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-black p-10">
+              <p className="text-sm uppercase tracking-[0.2em] text-emerald-200 mb-4">Core Plan</p>
+              <div className="flex items-end gap-3 mb-6">
+                <span className="text-5xl font-bold">$4</span>
+                <span className="text-gray-400 text-sm mb-2">per month / org</span>
+              </div>
+              <p className="text-gray-300 mb-8">
+                Unlimited workflows, approvers, and audit logs with SLA reminders built in.
+              </p>
+              <div className="grid gap-4 text-sm text-gray-200">
+                {[
+                  "Unlimited approval workflows",
+                  "Custom SLA timers + escalations",
+                  "In-app notifications",
+                  "Audit trail and exports",
+                  "Granular permissions",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <CheckIcon className="w-5 h-5 text-emerald-300" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-neutral-900/70 p-10">
+              <p className="text-sm text-gray-400 mb-4">Ready to start?</p>
+              <h3 className="text-2xl font-semibold mb-4">Activate in minutes</h3>
+              <p className="text-gray-400 mb-8">
+                Create an org, add a card, and invite your team. Join an org for free.
+              </p>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="/signup"
+                  className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded-full text-sm font-medium text-center transition"
+                >
+                  Proceed to billing
+                </a>
+                <a
+                  href="/login"
+                  className="border border-white/20 hover:border-white/40 px-6 py-3 rounded-full text-sm font-medium text-center transition"
+                >
+                  Join existing org
+                </a>
+              </div>
+              <p className="text-xs text-gray-500 mt-6">
+                Payment required only when creating a new organization.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

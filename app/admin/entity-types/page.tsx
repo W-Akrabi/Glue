@@ -16,6 +16,13 @@ export default async function AdminEntityTypesPage() {
   if (session.user.role !== 'ADMIN') {
     redirect('/dashboard');
   }
+  const org = await prisma.organization.findUnique({
+    where: { id: session.user.organizationId },
+    select: { subscriptionStatus: true },
+  });
+  if (!org || org.subscriptionStatus !== 'active') {
+    redirect('/billing');
+  }
 
   const entityTypes = await prisma.entityType.findMany({
     where: { organizationId: session.user.organizationId! },
@@ -53,34 +60,40 @@ export default async function AdminEntityTypesPage() {
 
       <nav className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-8">
-            <Link
-              href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/requests"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Records
-            </Link>
-            <Link
-              href="/admin/entity-types"
-              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
-            >
-              Entity Types
-            </Link>
-            <Link
-              href="/admin/workflows"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Workflows
-            </Link>
-          </div>
+        <div className="flex gap-8">
+          <Link
+            href="/dashboard"
+            className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/requests"
+            className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+          >
+            Records
+          </Link>
+          <Link
+            href="/admin/entity-types"
+            className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
+          >
+            Entity Types
+          </Link>
+          <Link
+            href="/admin/workflows"
+            className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+          >
+            Workflows
+          </Link>
+          <Link
+            href="/billing"
+            className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+          >
+            Billing
+          </Link>
         </div>
-      </nav>
+      </div>
+    </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <Card className="border-white/10 bg-neutral-900/70">

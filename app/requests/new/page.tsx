@@ -12,6 +12,13 @@ export default async function NewRequestPage() {
   if (!session?.user) {
     redirect('/login');
   }
+  const org = await prisma.organization.findUnique({
+    where: { id: session.user.organizationId },
+    select: { subscriptionStatus: true },
+  });
+  if (!org || org.subscriptionStatus !== 'active') {
+    redirect('/billing');
+  }
   if (session.user.role === 'VIEWER') {
     redirect('/requests');
   }
@@ -95,6 +102,12 @@ export default async function NewRequestPage() {
                 </Link>
               </>
             )}
+            <Link
+              href="/billing"
+              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
+            >
+              Billing
+            </Link>
           </div>
         </div>
       </nav>

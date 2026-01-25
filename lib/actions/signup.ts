@@ -1,8 +1,8 @@
 'use server';
 
+import { signIn } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { redirect } from 'next/navigation';
 
 type SignUpState = {
   error?: string;
@@ -74,6 +74,9 @@ export async function signUp(_prevState: SignUpState, formData: FormData) {
         data: {
           name: orgName,
           inviteCode: newInviteCode,
+          subscriptionStatus: 'inactive',
+          planPriceCents: 400,
+          planCurrency: 'USD',
         },
       });
 
@@ -103,7 +106,8 @@ export async function signUp(_prevState: SignUpState, formData: FormData) {
       });
     });
 
-    redirect('/login');
+    await signIn('credentials', { email, password, redirectTo: '/billing' });
+    return;
   }
 
   if (!inviteCode) {
@@ -141,5 +145,5 @@ export async function signUp(_prevState: SignUpState, formData: FormData) {
     },
   });
 
-  redirect('/login');
+  await signIn('credentials', { email, password, redirectTo: '/dashboard' });
 }

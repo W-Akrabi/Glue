@@ -32,6 +32,12 @@ model Organization {
   id        String    @id @default(cuid())
   name      String
   inviteCode String   @unique
+  subscriptionStatus String @default("inactive")
+  planPriceCents Int @default(400)
+  planCurrency String @default("USD")
+  billingCardLast4 String?
+  billingCardBrand String?
+  billingUpdatedAt DateTime?
   createdAt DateTime  @default(now())
   users     User[]
   entityTypes EntityType[]

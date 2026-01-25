@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useFormState } from "react-dom";
+import { useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +10,7 @@ import Link from "next/link";
 
 export default function SignUpPage() {
   const [mode, setMode] = useState<"create" | "join">("join");
-  const [state, formAction] = useFormState(signUp, {});
+  const [state, formAction] = useActionState(signUp, {});
 
   const helperText = useMemo(
     () =>

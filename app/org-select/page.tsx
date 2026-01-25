@@ -11,6 +11,13 @@ export default async function OrgSelectPage() {
   if (!session?.user) {
     redirect('/login');
   }
+  const org = await prisma.organization.findUnique({
+    where: { id: session.user.organizationId },
+    select: { subscriptionStatus: true },
+  });
+  if (!org || org.subscriptionStatus !== 'active') {
+    redirect('/billing');
+  }
 
   const organization = await prisma.organization.findUnique({
     where: { id: session.user.organizationId! },
