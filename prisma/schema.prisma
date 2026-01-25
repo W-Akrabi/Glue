@@ -137,6 +137,12 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+enum CommentType {
+  COMMENT
+  QUESTION
+  BLOCKER
+}
+
 model Comment {
   id        String   @id @default(cuid())
   recordId  String
@@ -144,6 +150,7 @@ model Comment {
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   body      String
+  type      CommentType @default(COMMENT)
   parentId  String?
   parent    Comment? @relation("CommentThread", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentThread")

@@ -34,12 +34,29 @@ export async function createComment(
     return { error: 'Comment cannot be empty.' };
   }
 
+  const parentId = String(formData.get('parentId') || '').trim() || null;
+  const rawType = String(formData.get('type') || '').trim().toUpperCase();
+  const type = rawType === 'QUESTION' || rawType === 'BLOCKER' ? rawType : 'COMMENT';
+
   const record = await prisma.record.findFirst({
     where: { id: recordId, organizationId: session.user.organizationId },
     include: { entityType: true },
   });
   if (!record) {
     return { error: 'Record not found.' };
+  }
+
+  if (parentId) {
+    const parent = await prisma.comment.findFirst({
+      where: { id: parentId, recordId },
+      select: { id: true, parentId: true },
+    });
+    if (!parent) {
+      return { error: 'Parent comment not found.' };
+    }
+    if (parent.parentId) {
+      return { error: 'Replies are limited to one level.' };
+    }
   }
 
   const tokens = extractMentions(body);
@@ -67,6 +84,8 @@ export async function createComment(
       recordId,
       authorId: session.user.id,
       body,
+      type: parentId ? 'COMMENT' : type,
+      parentId,
       mentions: tokens,
     },
   });

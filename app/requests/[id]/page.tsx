@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import ApprovalActions from './approval-actions';
 import CommentForm from './comment-form';
+import ReplyForm from './reply-form';
 
 export default async function RequestDetailPage({
   params,
@@ -105,9 +106,16 @@ export default async function RequestDetailPage({
 
   const comments = await prisma.comment.findMany({
     where: { recordId: request.id, parentId: null },
-    include: { author: true },
+    include: {
+      author: true,
+      replies: { include: { author: true }, orderBy: { createdAt: 'asc' } },
+    },
     orderBy: { createdAt: 'desc' },
   });
+
+  const openBlockers = comments.filter(
+    (comment) => comment.type === 'BLOCKER' && !comment.resolvedAt
+  ).length;
 
   const timelineItems = [
     ...auditLogs.map((log) => ({ type: 'audit' as const, createdAt: log.timestamp, log })),
@@ -281,6 +289,11 @@ export default async function RequestDetailPage({
               </CardHeader>
               <CardContent className="space-y-6">
                 <CommentForm recordId={request.id} />
+                {openBlockers > 0 ? (
+                  <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                    {openBlockers} open blocker{openBlockers === 1 ? '' : 's'} need resolution before approval.
+                  </div>
+                ) : null}
                 <div className="space-y-5">
                   {timelineItems.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No activity yet.</p>
@@ -292,6 +305,19 @@ export default async function RequestDetailPage({
                           : [];
                         const canResolve =
                           session.user.role === 'ADMIN' || item.comment.authorId === session.user.id;
+                        const typeLabel =
+                          item.comment.type === 'QUESTION'
+                            ? 'Question'
+                            : item.comment.type === 'BLOCKER'
+                            ? 'Blocker'
+                            : 'Comment';
+                        const typeBadgeClass =
+                          item.comment.type === 'BLOCKER'
+                            ? 'bg-rose-500/10 text-rose-200 border-rose-500/30'
+                            : item.comment.type === 'QUESTION'
+                            ? 'bg-amber-500/10 text-amber-200 border-amber-500/30'
+                            : 'bg-slate-500/10 text-slate-200 border-slate-500/30';
+
                         return (
                           <div key={item.comment.id} className="flex gap-4 text-sm">
                             <div className="flex-shrink-0 w-2 h-2 bg-sky-300 rounded-full mt-1.5"></div>
@@ -303,6 +329,12 @@ export default async function RequestDetailPage({
                                   </span>{' '}
                                   commented
                                 </p>
+                                <Badge
+                                  className={`px-2 py-0.5 text-[10px] uppercase tracking-wide border ${typeBadgeClass}`}
+                                  variant="secondary"
+                                >
+                                  {typeLabel}
+                                </Badge>
                                 {item.comment.resolvedAt ? (
                                   <Badge
                                     className="px-2 py-0.5 text-[10px] uppercase tracking-wide bg-emerald-500/10 text-emerald-200 border border-emerald-500/30"
@@ -319,6 +351,21 @@ export default async function RequestDetailPage({
                                 <p className="mt-1 text-xs text-gray-400">
                                   Mentions: {mentionTokens.map((mention) => `@${mention}`).join(', ')}
                                 </p>
+                              ) : null}
+                              {item.comment.replies.length > 0 ? (
+                                <div className="mt-3 space-y-3 border-l border-white/10 pl-4">
+                                  {item.comment.replies.map((reply) => (
+                                    <div key={reply.id} className="text-sm">
+                                      <p className="text-xs text-gray-400">
+                                        {reply.author.name || reply.author.email} replied
+                                      </p>
+                                      <p className="text-sm text-gray-200 whitespace-pre-wrap">{reply.body}</p>
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        {new Date(reply.createdAt).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
                               ) : null}
                               <div className="mt-2 flex items-center gap-3">
                                 <p className="text-muted-foreground text-xs">
@@ -339,6 +386,9 @@ export default async function RequestDetailPage({
                                     </form>
                                   )
                                 ) : null}
+                              </div>
+                              <div className="mt-3">
+                                <ReplyForm recordId={request.id} parentId={item.comment.id} />
                               </div>
                             </div>
                           </div>

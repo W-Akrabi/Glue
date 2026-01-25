@@ -195,6 +195,19 @@ export async function approveRecord(
       return { error: 'Insufficient permissions' };
     }
 
+    const unresolvedBlockers = await prisma.comment.count({
+      where: {
+        recordId,
+        resolvedAt: null,
+        type: 'BLOCKER',
+        parentId: null,
+      },
+    });
+
+    if (unresolvedBlockers > 0) {
+      return { error: 'Resolve open blockers before approving.' };
+    }
+
     const currentIndex = steps.findIndex(
       (step) => step.step === record.workflowInstance!.currentStep
     );
