@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: glue
+      POSTGRES_PASSWORD: glue_password
+      POSTGRES_DB: glue_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - glue_pgdata:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+volumes:
+  glue_pgdata:

@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getCreateRoles, getEntitySchema, getWorkflowSteps } from '@/lib/records';
+import { getApprovalError } from '@/lib/records/approval';
 import { extractMentions } from '@/lib/records/comments';
 import { isPendingApprovalStatus } from '@/lib/records/status';
 import { requireActiveSubscription } from '@/lib/billing';
@@ -147,14 +148,6 @@ export async function approveRecord(
       return { error: 'Record not found' };
     }
 
-    if (!isPendingApprovalStatus(record.status)) {
-      return { error: 'Record is not pending approval' };
-    }
-
-    if (!isPendingApprovalStatus(record.workflowInstance.status)) {
-      return { error: 'Workflow is not pending approval' };
-    }
-
     const steps = getWorkflowSteps(record.entityType.workflowDefinition?.steps ?? []);
     if (steps.length === 0) {
       return { error: 'Workflow definition missing' };
@@ -168,10 +161,6 @@ export async function approveRecord(
       return { error: 'Invalid workflow state' };
     }
 
-    if (currentStep.status !== 'PENDING') {
-      return { error: 'Current step has already been resolved' };
-    }
-
     const requiredRole =
       steps.find((step) => step.step === record.workflowInstance!.currentStep)?.role || '';
 
@@ -183,18 +172,6 @@ export async function approveRecord(
       ? currentStep.assignedApproverIds.map((id) => String(id))
       : [];
 
-    if (assignedApproverIds.length === 0) {
-      return { error: 'Approvers have not been assigned for this step' };
-    }
-
-    if (!assignedApproverIds.includes(session.user.id)) {
-      return { error: 'You are not assigned to this approval step' };
-    }
-
-    if (requiredRole && session.user.role !== requiredRole) {
-      return { error: 'Insufficient permissions' };
-    }
-
     const unresolvedBlockers = await prisma.comment.count({
       where: {
         recordId,
@@ -204,8 +181,18 @@ export async function approveRecord(
       },
     });
 
-    if (unresolvedBlockers > 0) {
-      return { error: 'Resolve open blockers before approving.' };
+    const approvalError = getApprovalError({
+      recordStatus: record.status,
+      workflowStatus: record.workflowInstance.status,
+      stepStatus: currentStep.status,
+      requiredRole,
+      assignedApproverIds,
+      userRole: session.user.role,
+      userId: session.user.id,
+      openBlockers: unresolvedBlockers,
+    });
+    if (approvalError) {
+      return { error: approvalError };
     }
 
     const currentIndex = steps.findIndex(

@@ -13,6 +13,12 @@ npm install
 2) Configure environment
 
 - Create `.env.local` and set `DATABASE_URL` for Postgres.
+- Optional: set `TEST_DATABASE_URL` for integration tests.
+- Optional: start Postgres via Docker:
+
+```bash
+docker compose up -d db
+```
 
 3) Run Prisma migrations
 
@@ -53,7 +59,24 @@ npm run dev
 
 ## Testing
 
-There is no formal test suite yet. Please include manual test notes in your PR description.
+Unit + integration tests (Vitest):
+
+```bash
+npm run test
+npm run test:coverage
+```
+
+E2E tests (Playwright):
+
+```bash
+npm run test:e2e
+```
+
+Test database reset:
+
+```bash
+npm run db:test:reset
+```
 
 ## Submitting changes
 
