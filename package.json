@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "sla:run": "tsx scripts/run-sla.ts",
     "db:dev:reset": "npx prisma migrate reset --force --skip-seed",
     "db:dev:seed": "npx prisma db seed",
     "db:dev:migrate": "npx prisma migrate dev",

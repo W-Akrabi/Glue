@@ -125,7 +125,7 @@ export default async function AdminWorkflowsPage() {
           <CardHeader>
             <CardTitle className="text-xl font-semibold">SLA tracking</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Manually run SLA checks to send overdue reminders and escalate assignments.
+              Run SLA checks on demand to send overdue reminders and escalate assignments.
             </p>
           </CardHeader>
           <CardContent>

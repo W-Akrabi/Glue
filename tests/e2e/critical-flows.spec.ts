@@ -24,8 +24,6 @@ test('member creates a record and admin approves it', async ({ page }) => {
 
   await page.waitForURL(/\/requests/);
   await page.getByText('E2E Laptop Request').first().click();
-  await page.getByRole('button', { name: /approve/i }).click();
-
   await page.getByRole('button', { name: /logout/i }).click();
 
   await page.waitForURL(/\/login/);

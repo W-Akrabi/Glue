@@ -38,5 +38,6 @@ npx prisma db seed
 npm run dev
 ```
 
-## Notes
-- SLA checks are manual for now (Admin -> Workflows -> Run SLA check)
+## SLA automation
+- Configure `SLA_CRON_SECRET` and call `POST /api/sla/run` with header `x-sla-cron-secret`
+- Or run `npm run sla:run` from a cron job/background worker
