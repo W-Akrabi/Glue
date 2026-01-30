@@ -210,7 +210,7 @@ export default function EntityTypeForm() {
                     <option value="date">Date</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2 md:col-span-1">
+                <div className="flex flex-col items-start gap-2 md:col-span-2">
                   <label className="flex items-center gap-2 text-xs text-gray-300">
                     <input
                       type="checkbox"
@@ -226,6 +226,7 @@ export default function EntityTypeForm() {
                     size="sm"
                     onClick={() => removeField(field.id)}
                     disabled={fields.length === 1}
+                    className="self-start"
                   >
                     Remove
                   </Button>

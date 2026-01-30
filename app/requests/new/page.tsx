@@ -1,14 +1,15 @@
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import RecordForm from './record-form';
+import AppShell from '@/components/layout/app-shell';
 
 export default async function NewRequestPage() {
   const session = await auth();
-  
+
   if (!session?.user) {
     redirect('/login');
   }
@@ -23,83 +24,14 @@ export default async function NewRequestPage() {
   });
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Glue</h1>
-              <p className="text-sm text-gray-400">Internal Tools</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium">{session.user.name}</p>
-                <p className="text-xs text-gray-500">{session.user.role}</p>
-              </div>
-              <form
-                action={async () => {
-                  'use server';
-                  await signOut({ redirectTo: '/login' });
-                }}
-              >
-                <Button type="submit" variant="ghost" size="sm">
-                  Logout
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-8">
-            <Link
-              href="/org-select"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Organization
-            </Link>
-            <Link
-              href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/requests"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Records
-            </Link>
-            <Link
-              href="/requests/new"
-              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
-            >
-              New Record
-            </Link>
-            {session.user.role === 'ADMIN' && (
-              <>
-                <Link
-                  href="/admin/entity-types"
-                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-                >
-                  Entity Types
-                </Link>
-                <Link
-                  href="/admin/workflows"
-                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-                >
-                  Workflows
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AppShell
+      session={session}
+      activeNav="requests"
+      headerTitle="New Record"
+      headerSubtitle="Projects / Glue"
+      topAction={{ label: 'Create', href: '/requests/new' }}
+    >
+      <div className="max-w-3xl">
         <Card className="border-white/10 bg-neutral-900/70">
           <CardHeader>
             <CardTitle>Create New Record</CardTitle>
@@ -119,9 +51,14 @@ export default async function NewRequestPage() {
                 }))}
               />
             )}
+            <div className="mt-6">
+              <Button variant="link" asChild>
+                <Link href="/requests">Back to records</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

@@ -1,4 +1,4 @@
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +18,7 @@ import { redirect } from 'next/navigation';
 import ApprovalActions from './approval-actions';
 import CommentForm from './comment-form';
 import ReplyForm from './reply-form';
+import AppShell from '@/components/layout/app-shell';
 
 export default async function RequestDetailPage({
   params,
@@ -26,7 +27,7 @@ export default async function RequestDetailPage({
 }) {
   const { id } = await params;
   const session = await auth();
-  
+
   if (!session?.user) {
     redirect('/login');
   }
@@ -49,9 +50,18 @@ export default async function RequestDetailPage({
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-sm text-muted-foreground">Record not found.</p>
-      </div>
+      <AppShell
+        session={session}
+        activeNav="requests"
+        headerTitle="Record"
+        headerSubtitle="Projects / Glue"
+        topAction={{ label: 'Create', href: '/requests/new' }}
+        showRightRail={false}
+      >
+        <div className="min-h-[40vh] flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">Record not found.</p>
+        </div>
+      </AppShell>
     );
   }
 
@@ -116,375 +126,240 @@ export default async function RequestDetailPage({
   ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Glue</h1>
-              <p className="text-sm text-gray-400">Internal Tools</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium">{session.user.name}</p>
-                <p className="text-xs text-gray-500">{session.user.role}</p>
-              </div>
-              <form
-                action={async () => {
-                  'use server';
-                  await signOut({ redirectTo: '/login' });
-                }}
+    <AppShell
+      session={session}
+      activeNav="requests"
+      headerTitle={title}
+      headerSubtitle="Projects / Glue"
+      topAction={{ label: 'Create', href: '/requests/new' }}
+      showRightRail={false}
+    >
+      <div className="mb-4">
+        <Button variant="link" asChild>
+          <Link href="/requests" className="text-sm">
+            Back to records
+          </Link>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="border-white/10 bg-neutral-900/70">
+            <CardHeader className="flex-row items-start justify-between space-y-0">
+              <CardTitle className="text-2xl font-bold" data-testid="request-title">
+                {title}
+              </CardTitle>
+              <Badge
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-medium border',
+                  getRecordStatusBadgeClasses(request.status)
+                )}
+                data-testid="request-status"
+                variant="secondary"
               >
-                <Button type="submit" variant="ghost" size="sm">
-                  Logout
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-8">
-            <Link
-              href="/org-select"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Organization
-            </Link>
-            <Link
-              href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/requests"
-              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
-            >
-              Records
-            </Link>
-            {session.user.role !== 'VIEWER' ? (
-              <Link
-                href="/requests/new"
-                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-              >
-                New Record
-              </Link>
-            ) : null}
-            {session.user.role === 'ADMIN' && (
-              <>
-                <Link
-                  href="/admin/entity-types"
-                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-                >
-                  Entity Types
-                </Link>
-                <Link
-                  href="/admin/workflows"
-                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-                >
-                  Workflows
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-4">
-          <Button variant="link" asChild>
-            <Link href="/requests" className="text-sm">
-              ← Back to records
-            </Link>
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Record Details */}
-            <Card className="border-white/10 bg-neutral-900/70">
-              <CardHeader className="flex-row items-start justify-between space-y-0">
-                <CardTitle className="text-2xl font-bold" data-testid="request-title">
-                  {title}
-                </CardTitle>
-                <Badge
-                  className={cn(
-                    "px-3 py-1 rounded-full text-xs font-medium border",
-                    getRecordStatusBadgeClasses(request.status)
-                  )}
-                  data-testid="request-status"
-                  variant="secondary"
-                >
-                  {getRecordStatusLabel(request.status)}
-                </Badge>
-                <p className="mt-2 text-xs text-gray-400">
-                  {getNextActionLabel(
-                    request.status,
-                    currentApproverNames.length > 0
-                      ? currentApproverNames.join(', ')
-                      : requiredRole
-                  )}
+                {getRecordStatusLabel(request.status)}
+              </Badge>
+              <p className="mt-2 text-xs text-gray-400">
+                {getNextActionLabel(
+                  request.status,
+                  currentApproverNames.length > 0 ? currentApproverNames.join(', ') : requiredRole
+                )}
+              </p>
+              {overdueLabel ? <p className="mt-1 text-xs text-rose-200">{overdueLabel}</p> : null}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-gray-300 mb-1">Description:</p>
+                <p className="text-muted-foreground whitespace-pre-wrap" data-testid="request-description">
+                  {description}
                 </p>
-                {overdueLabel ? <p className="mt-1 text-xs text-rose-200">{overdueLabel}</p> : null}
-              </CardHeader>
-              <CardContent className="space-y-4">
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
                 <div>
-                  <p className="text-sm font-medium text-gray-300 mb-1">Description:</p>
-                  <p className="text-muted-foreground whitespace-pre-wrap" data-testid="request-description">
-                    {description}
+                  <p className="text-sm font-medium text-gray-300">Created By:</p>
+                  <p className="text-muted-foreground">
+                    {request.createdBy.name || request.createdBy.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{request.createdBy.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-300">Created:</p>
+                  <p className="text-muted-foreground">
+                    {new Date(request.createdAt).toLocaleString()}
                   </p>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
-                  <div>
-                    <p className="text-sm font-medium text-gray-300">Created By:</p>
-                    <p className="text-muted-foreground">{request.createdBy.name || request.createdBy.email}</p>
-                    <p className="text-sm text-muted-foreground">{request.createdBy.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-300">Created:</p>
-                    <p className="text-muted-foreground">
-                      {new Date(request.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-300">Type:</p>
-                    <p className="text-muted-foreground">{request.entityType.name}</p>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-300">Type:</p>
+                  <p className="text-muted-foreground">{request.entityType.name}</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Approval Actions */}
-            {canApprove ? (
-              <ApprovalActions
-                recordId={request.id}
-                currentStep={request.workflowInstance?.currentStep ?? 0}
-                requiredRole={requiredRole}
-              />
-            ) : null}
+          {canApprove ? (
+            <ApprovalActions
+              recordId={request.id}
+              currentStep={request.workflowInstance?.currentStep ?? 0}
+              requiredRole={requiredRole}
+            />
+          ) : null}
 
-            {/* Timeline */}
-            <Card className="border-white/10 bg-neutral-900/70">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Timeline</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <CommentForm recordId={request.id} />
-                {openBlockers > 0 ? (
-                  <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
-                    {openBlockers} open blocker{openBlockers === 1 ? '' : 's'} need resolution before approval.
-                  </div>
-                ) : null}
-                <div className="space-y-5">
-                  {timelineItems.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No activity yet.</p>
-                  ) : (
-                    timelineItems.map((item) => {
-                      if (item.type === 'comment') {
-                        const mentionTokens = Array.isArray(item.comment.mentions)
-                          ? item.comment.mentions.filter((mention) => typeof mention === 'string')
-                          : [];
-                        const canResolve =
-                          session.user.role === 'ADMIN' || item.comment.authorId === session.user.id;
-                        const typeLabel =
-                          item.comment.type === 'QUESTION'
-                            ? 'Question'
-                            : item.comment.type === 'BLOCKER'
-                            ? 'Blocker'
-                            : 'Comment';
-                        const typeBadgeClass =
-                          item.comment.type === 'BLOCKER'
-                            ? 'bg-rose-500/10 text-rose-200 border-rose-500/30'
-                            : item.comment.type === 'QUESTION'
-                            ? 'bg-amber-500/10 text-amber-200 border-amber-500/30'
-                            : 'bg-slate-500/10 text-slate-200 border-slate-500/30';
-
-                        return (
-                          <div key={item.comment.id} className="flex gap-4 text-sm">
-                            <div className="flex-shrink-0 w-2 h-2 bg-sky-300 rounded-full mt-1.5"></div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <p>
-                                  <span className="font-medium">
-                                    {item.comment.author.name || item.comment.author.email}
-                                  </span>{' '}
-                                  commented
-                                </p>
-                                <Badge
-                                  className={`px-2 py-0.5 text-[10px] uppercase tracking-wide border ${typeBadgeClass}`}
-                                  variant="secondary"
-                                >
-                                  {typeLabel}
-                                </Badge>
-                                {item.comment.resolvedAt ? (
-                                  <Badge
-                                    className="px-2 py-0.5 text-[10px] uppercase tracking-wide bg-emerald-500/10 text-emerald-200 border border-emerald-500/30"
-                                    variant="secondary"
-                                  >
-                                    Resolved
-                                  </Badge>
-                                ) : null}
-                              </div>
-                              <p className="mt-1 text-sm text-gray-200 whitespace-pre-wrap">
-                                {item.comment.body}
-                              </p>
-                              {mentionTokens.length > 0 ? (
-                                <p className="mt-1 text-xs text-gray-400">
-                                  Mentions: {mentionTokens.map((mention) => `@${mention}`).join(', ')}
-                                </p>
-                              ) : null}
-                              {item.comment.replies.length > 0 ? (
-                                <div className="mt-3 space-y-3 border-l border-white/10 pl-4">
-                                  {item.comment.replies.map((reply) => (
-                                    <div key={reply.id} className="text-sm">
-                                      <p className="text-xs text-gray-400">
-                                        {reply.author.name || reply.author.email} replied
-                                      </p>
-                                      <p className="text-sm text-gray-200 whitespace-pre-wrap">{reply.body}</p>
-                                      <p className="text-xs text-muted-foreground mt-1">
-                                        {new Date(reply.createdAt).toLocaleString()}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : null}
-                              <div className="mt-2 flex items-center gap-3">
-                                <p className="text-muted-foreground text-xs">
-                                  {new Date(item.comment.createdAt).toLocaleString()}
-                                </p>
-                                {canResolve ? (
-                                  item.comment.resolvedAt ? (
-                                    <form action={unresolveComment.bind(null, item.comment.id)}>
-                                      <Button variant="ghost" size="sm" className="text-xs">
-                                        Reopen
-                                      </Button>
-                                    </form>
-                                  ) : (
-                                    <form action={resolveComment.bind(null, item.comment.id)}>
-                                      <Button variant="ghost" size="sm" className="text-xs">
-                                        Resolve
-                                      </Button>
-                                    </form>
-                                  )
-                                ) : null}
-                              </div>
-                              <div className="mt-3">
-                                <ReplyForm recordId={request.id} parentId={item.comment.id} />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      const metadata = (item.log.metadata ?? {}) as Record<string, unknown>;
-                      const comment = typeof metadata.comment === 'string' ? metadata.comment : '';
-                      const mentions = Array.isArray(metadata.mentions)
-                        ? metadata.mentions.filter((mention) => typeof mention === 'string')
+          <Card className="border-white/10 bg-neutral-900/70">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Timeline</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <CommentForm recordId={request.id} />
+              {openBlockers > 0 ? (
+                <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                  {openBlockers} open blocker{openBlockers === 1 ? '' : 's'} need resolution before approval.
+                </div>
+              ) : null}
+              <div className="space-y-5">
+                {timelineItems.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No activity yet.</p>
+                ) : (
+                  timelineItems.map((item) => {
+                    if (item.type === 'comment') {
+                      const mentionTokens = Array.isArray(item.comment.mentions)
+                        ? item.comment.mentions.filter((mention) => typeof mention === 'string')
                         : [];
+                      const canResolve =
+                        session.user.role === 'ADMIN' || item.comment.authorId === session.user.id;
+                      const typeLabel =
+                        item.comment.type === 'QUESTION'
+                          ? 'Question'
+                          : item.comment.type === 'BLOCKER'
+                          ? 'Blocker'
+                          : 'Comment';
+                      const typeBadgeClass =
+                        item.comment.type === 'BLOCKER'
+                          ? 'bg-rose-500/10 text-rose-200 border-rose-500/30'
+                          : item.comment.type === 'QUESTION'
+                          ? 'bg-amber-500/10 text-amber-200 border-amber-500/30'
+                          : 'bg-slate-500/10 text-slate-200 border-slate-500/30';
 
                       return (
-                        <div key={item.log.id} className="flex gap-4 text-sm" data-testid={`audit-log-${item.log.id}`}>
-                          <div className="flex-shrink-0 w-2 h-2 bg-emerald-400 rounded-full mt-1.5"></div>
+                        <div key={item.comment.id} className="flex gap-4 text-sm">
+                          <div className="flex-shrink-0 w-2 h-2 bg-sky-300 rounded-full mt-1.5"></div>
                           <div className="flex-1">
-                            <p>
-                              <span className="font-medium">{item.log.actor.name || item.log.actor.email}</span>{' '}
-                              {item.log.action.toLowerCase()} this request
-                            </p>
-                            {comment ? <p className="mt-1 text-sm text-gray-200">{comment}</p> : null}
-                            {mentions.length > 0 ? (
-                              <p className="mt-1 text-xs text-gray-400">
-                                Mentions: {mentions.map((mention) => `@${mention}`).join(', ')}
+                            <div className="flex items-center gap-2">
+                              <p>
+                                <span className="font-medium">
+                                  {item.comment.author.name || item.comment.author.email}
+                                </span>{' '}
+                                commented
                               </p>
-                            ) : null}
-                            <p className="text-muted-foreground text-xs mt-1">
-                              {new Date(item.log.timestamp).toLocaleString()}
+                              <Badge
+                                className={`px-2 py-0.5 text-[10px] uppercase tracking-wide border ${typeBadgeClass}`}
+                                variant="secondary"
+                              >
+                                {typeLabel}
+                              </Badge>
+                              <span className="text-xs text-gray-500">
+                                {new Date(item.comment.createdAt).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-muted-foreground mt-2 whitespace-pre-wrap">
+                              {item.comment.body}
                             </p>
+                            {mentionTokens.length > 0 ? (
+                              <div className="flex flex-wrap gap-2 mt-2 text-xs text-emerald-200">
+                                {mentionTokens.map((mention) => (
+                                  <span key={mention} className="px-2 py-1 rounded-full bg-emerald-500/10">
+                                    @{mention}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
+                            <div className="flex items-center gap-2 mt-3">
+                              <ReplyForm recordId={request.id} parentId={item.comment.id} />
+                              {item.comment.type === 'BLOCKER' && canResolve ? (
+                                <form
+                                  action={item.comment.resolvedAt ? unresolveComment : resolveComment}
+                                  className="inline"
+                                >
+                                  <input type="hidden" name="commentId" value={item.comment.id} />
+                                  <Button type="submit" variant="ghost" size="sm">
+                                    {item.comment.resolvedAt ? 'Reopen' : 'Resolve'} blocker
+                                  </Button>
+                                </form>
+                              ) : null}
+                            </div>
+                            {item.comment.replies.length > 0 ? (
+                              <div className="mt-4 space-y-4">
+                                {item.comment.replies.map((reply) => (
+                                  <div key={reply.id} className="flex gap-3">
+                                    <div className="flex-shrink-0 w-1.5 h-1.5 bg-gray-500 rounded-full mt-1.5"></div>
+                                    <div>
+                                      <p className="text-sm">
+                                        <span className="font-medium">
+                                          {reply.author.name || reply.author.email}
+                                        </span>{' '}
+                                        <span className="text-xs text-gray-500">
+                                          {new Date(reply.createdAt).toLocaleString()}
+                                        </span>
+                                      </p>
+                                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                                        {reply.body}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       );
-                    })
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    }
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Approval Progress */}
-            <Card className="border-white/10 bg-neutral-900/70">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Approval Progress</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {request.workflowInstance?.steps.length ? (
-                  request.workflowInstance.steps.map((step) => (
-                    <div key={step.id} className="flex items-start gap-3" data-testid={`step-${step.stepNumber}`}>
-                      <div
-                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-                          step.status === 'APPROVED'
-                            ? 'bg-emerald-500/15 text-emerald-200'
-                            : step.status === 'REJECTED'
-                            ? 'bg-rose-500/15 text-rose-200'
-                            : step.stepNumber === request.workflowInstance?.currentStep
-                            ? 'bg-amber-500/15 text-amber-200'
-                            : 'bg-white/10 text-gray-400'
-                        }`}
-                      >
-                        {step.status === 'APPROVED' ? '✓' : step.status === 'REJECTED' ? '✗' : step.stepNumber}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">Step {step.stepNumber}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {workflowMap.get(step.stepNumber) || 'UNKNOWN'} approval
-                        </p>
-                        {Array.isArray(step.assignedApproverIds) && step.assignedApproverIds.length > 0 ? (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Assigned to{" "}
-                            {step.assignedApproverIds
-                              .map((id) => orgUserMap.get(String(id)))
-                              .filter(Boolean)
-                              .map((user) => user?.name || user?.email)
-                              .join(", ")}
+                    return (
+                      <div key={item.log.id} className="flex gap-4 text-sm">
+                        <div className="flex-shrink-0 w-2 h-2 bg-emerald-300 rounded-full mt-1.5"></div>
+                        <div>
+                          <p>
+                            <span className="font-medium">{item.log.actor.name || item.log.actor.email}</span>{' '}
+                            {item.log.action.toLowerCase()}
                           </p>
-                        ) : (
-                          <p className="text-xs text-amber-200/80 mt-1">Approver unassigned</p>
-                        )}
-                        {step.approvedAt && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(step.approvedAt).toLocaleDateString()}
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(item.log.timestamp).toLocaleString()}
                           </p>
-                        )}
+                        </div>
                       </div>
-                      <Badge
-                        className={cn(
-                          "px-2 py-1 rounded text-xs font-medium border",
-                          step.status === 'APPROVED'
-                            ? 'bg-emerald-500/10 text-emerald-200 border-emerald-500/30'
-                            : step.status === 'REJECTED'
-                            ? 'bg-rose-500/10 text-rose-200 border-rose-500/30'
-                            : 'bg-white/10 text-gray-300 border-white/10'
-                        )}
-                        variant="secondary"
-                      >
-                        {step.status}
-                      </Badge>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">No workflow steps configured.</p>
+                    );
+                  })
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-    </div>
+
+        <div className="space-y-6">
+          <Card className="border-white/10 bg-neutral-900/70">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Record metadata</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground">Organization</p>
+                <p>{request.organization.name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Current step</p>
+                <p>
+                  Step {request.workflowInstance?.currentStep ?? 0} of{' '}
+                  {request.workflowInstance?.steps.length ?? 0}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Approvers</p>
+                <p>{currentApproverNames.length > 0 ? currentApproverNames.join(', ') : 'Unassigned'}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </AppShell>
   );
 }

@@ -1,4 +1,4 @@
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,7 @@ import {
 import { getOverdueLabel } from '@/lib/records/sla';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import AppShell from '@/components/layout/app-shell';
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -172,86 +173,15 @@ export default async function RequestsPage({
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Glue</h1>
-              <p className="text-sm text-gray-400">Internal Tools</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium">{session.user.name}</p>
-                <p className="text-xs text-gray-500">{session.user.role}</p>
-              </div>
-              <form
-                action={async () => {
-                  'use server';
-                  await signOut({ redirectTo: '/login' });
-                }}
-              >
-                <Button type="submit" variant="ghost" size="sm">
-                  Logout
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-8">
-            <Link
-              href="/org-select"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Organization
-            </Link>
-            <Link
-              href="/dashboard"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/requests"
-              className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
-            >
-              Records
-            </Link>
-            {session.user.role !== 'VIEWER' ? (
-              <Link
-                href="/requests/new"
-                className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-              >
-                New Record
-              </Link>
-            ) : null}
-            {session.user.role === 'ADMIN' && (
-              <>
-                <Link
-                  href="/admin/entity-types"
-                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-                >
-                  Entity Types
-                </Link>
-                <Link
-                  href="/admin/workflows"
-                  className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-                >
-                  Workflows
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <AppShell
+      session={session}
+      activeNav="requests"
+      headerTitle="Records"
+      headerSubtitle="Projects / Glue"
+      topAction={{ label: 'Create', href: '/requests/new' }}
+    >
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold">Records</h2>
             <p className="text-sm text-gray-500">
@@ -263,14 +193,14 @@ export default async function RequestsPage({
           </Button>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-3">
           <Link
             href={`/requests${buildQuery({ view: 'all' })}`}
             className={cn(
-              "rounded-full border px-4 py-2 text-sm transition",
+              'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'all'
-                ? "border-emerald-400 text-emerald-200 bg-emerald-400/10"
-                : "border-white/10 text-gray-400 hover:text-white"
+                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
+                : 'border-white/10 text-gray-400 hover:text-white'
             )}
           >
             All ({counts.all})
@@ -278,10 +208,10 @@ export default async function RequestsPage({
           <Link
             href={`/requests${buildQuery({ view: 'assigned' })}`}
             className={cn(
-              "rounded-full border px-4 py-2 text-sm transition",
+              'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'assigned'
-                ? "border-emerald-400 text-emerald-200 bg-emerald-400/10"
-                : "border-white/10 text-gray-400 hover:text-white"
+                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
+                : 'border-white/10 text-gray-400 hover:text-white'
             )}
           >
             Needs my approval ({counts.assigned})
@@ -289,10 +219,10 @@ export default async function RequestsPage({
           <Link
             href={`/requests${buildQuery({ view: 'created' })}`}
             className={cn(
-              "rounded-full border px-4 py-2 text-sm transition",
+              'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'created'
-                ? "border-emerald-400 text-emerald-200 bg-emerald-400/10"
-                : "border-white/10 text-gray-400 hover:text-white"
+                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
+                : 'border-white/10 text-gray-400 hover:text-white'
             )}
           >
             Created by me ({counts.created})
@@ -300,17 +230,17 @@ export default async function RequestsPage({
           <Link
             href={`/requests${buildQuery({ view: 'related' })}`}
             className={cn(
-              "rounded-full border px-4 py-2 text-sm transition",
+              'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'related'
-                ? "border-emerald-400 text-emerald-200 bg-emerald-400/10"
-                : "border-white/10 text-gray-400 hover:text-white"
+                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
+                : 'border-white/10 text-gray-400 hover:text-white'
             )}
           >
             Related to me ({counts.related})
           </Link>
         </div>
 
-        <form method="get" className="mb-6 flex flex-wrap items-center gap-3">
+        <form method="get" className="flex flex-wrap items-center gap-3">
           <input
             name="q"
             defaultValue={query}
@@ -408,12 +338,8 @@ export default async function RequestsPage({
                         {request.entityType.name}
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">
-                          {request.createdBy.name || request.createdBy.email}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {request.createdBy.email}
-                        </div>
+                        <div className="text-sm">{request.createdBy.name || request.createdBy.email}</div>
+                        <div className="text-xs text-muted-foreground">{request.createdBy.email}</div>
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -457,7 +383,7 @@ export default async function RequestsPage({
             </Table>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }
