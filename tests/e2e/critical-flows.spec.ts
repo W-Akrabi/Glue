@@ -1,16 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test('billing unlocks dashboard access', async ({ page }) => {
+test('admin lands on dashboard after login', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Email Address').fill('admin@acme.com');
   await page.getByLabel('Password').fill('password123');
   await page.getByRole('button', { name: /sign in/i }).click();
-
-  await page.waitForURL(/\/billing/);
-  await page.getByPlaceholder('Jane Doe').fill('Admin User');
-  await page.getByPlaceholder('4242 4242 4242 4242').fill('4242 4242 4242 4242');
-  await page.getByPlaceholder('Visa').fill('Visa');
-  await page.getByRole('button', { name: /activate subscription/i }).click();
 
   await page.waitForURL(/\/dashboard/);
   await expect(page.getByText('Dashboard')).toBeVisible();

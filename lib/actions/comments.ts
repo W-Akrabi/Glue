@@ -2,7 +2,6 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { requireActiveSubscription } from '@/lib/billing';
 import { extractMentions } from '@/lib/records/comments';
 import { getEntitySchema, getRecordTitle } from '@/lib/records';
 import { revalidatePath } from 'next/cache';
@@ -24,9 +23,6 @@ export async function createComment(
   const session = await auth();
   if (!session?.user) {
     return { error: 'Unauthorized' };
-  }
-  if (!(await requireActiveSubscription(session.user.organizationId))) {
-    return { error: 'Subscription inactive. Add billing to continue.' };
   }
 
   const body = String(formData.get('body') || '').trim();
@@ -114,9 +110,6 @@ export async function resolveComment(commentId: string) {
   if (!session?.user) {
     return { error: 'Unauthorized' };
   }
-  if (!(await requireActiveSubscription(session.user.organizationId))) {
-    return { error: 'Subscription inactive. Add billing to continue.' };
-  }
 
   const comment = await prisma.comment.findFirst({
     where: { id: commentId, record: { organizationId: session.user.organizationId } },
@@ -146,9 +139,6 @@ export async function unresolveComment(commentId: string) {
   const session = await auth();
   if (!session?.user) {
     return { error: 'Unauthorized' };
-  }
-  if (!(await requireActiveSubscription(session.user.organizationId))) {
-    return { error: 'Subscription inactive. Add billing to continue.' };
   }
 
   const comment = await prisma.comment.findFirst({

@@ -17,13 +17,6 @@ export default async function AdminWorkflowsPage() {
   if (session.user.role !== 'ADMIN') {
     redirect('/dashboard');
   }
-  const org = await prisma.organization.findUnique({
-    where: { id: session.user.organizationId },
-    select: { subscriptionStatus: true },
-  });
-  if (!org || org.subscriptionStatus !== 'active') {
-    redirect('/billing');
-  }
 
   const entityTypes = await prisma.entityType.findMany({
     where: { organizationId: session.user.organizationId! },
@@ -94,12 +87,6 @@ export default async function AdminWorkflowsPage() {
             className="px-3 py-4 text-sm font-medium text-emerald-300 border-b-2 border-emerald-400"
           >
             Workflows
-          </Link>
-          <Link
-            href="/billing"
-            className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-          >
-            Billing
           </Link>
         </div>
       </div>

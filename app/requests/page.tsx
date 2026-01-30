@@ -27,13 +27,6 @@ export default async function RequestsPage() {
   if (!session?.user) {
     redirect('/login');
   }
-  const org = await prisma.organization.findUnique({
-    where: { id: session.user.organizationId },
-    select: { subscriptionStatus: true },
-  });
-  if (!org || org.subscriptionStatus !== 'active') {
-    redirect('/billing');
-  }
 
   const requests = await prisma.record.findMany({
     where: { organizationId: session.user.organizationId! },
@@ -129,12 +122,6 @@ export default async function RequestsPage() {
                 </Link>
               </>
             )}
-            <Link
-              href="/billing"
-              className="px-3 py-4 text-sm font-medium text-gray-400 hover:text-white transition"
-            >
-              Billing
-            </Link>
           </div>
         </div>
       </nav>

@@ -74,9 +74,6 @@ export async function signUp(_prevState: SignUpState, formData: FormData) {
         data: {
           name: orgName,
           inviteCode: newInviteCode,
-          subscriptionStatus: 'inactive',
-          planPriceCents: 400,
-          planCurrency: 'USD',
         },
       });
 
@@ -106,7 +103,7 @@ export async function signUp(_prevState: SignUpState, formData: FormData) {
       });
     });
 
-    await signIn('credentials', { email, password, redirectTo: '/billing' });
+    await signIn('credentials', { email, password, redirectTo: '/dashboard' });
     return;
   }
 

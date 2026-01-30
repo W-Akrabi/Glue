@@ -5,7 +5,7 @@ Glue is the approvals OS for fast-moving teams. We turn messy requests into stru
 - Assign specific approvers per step (multiple users) with role-aware gates
 - Track SLAs, send overdue reminders, and escalate with one click
 - See live status, audit trails, and decision history in one place
-- Simple org pricing: $4/month with a lightweight billing gate
+- No billing gate; orgs can start immediately
 
 ## Product highlights
 - Workflow builder for entity types
@@ -38,11 +38,5 @@ npx prisma db seed
 npm run dev
 ```
 
-## Billing flow (dev)
-- New org signups land on `/billing`
-- Submit the in-app card form to activate subscription
-- Joiners do not pay
-
 ## Notes
 - SLA checks are manual for now (Admin -> Workflows -> Run SLA check)
-- Replace the billing action with Stripe when ready

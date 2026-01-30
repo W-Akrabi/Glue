@@ -6,7 +6,6 @@ import { getCreateRoles, getEntitySchema, getWorkflowSteps } from '@/lib/records
 import { getApprovalError } from '@/lib/records/approval';
 import { extractMentions } from '@/lib/records/comments';
 import { isPendingApprovalStatus } from '@/lib/records/status';
-import { requireActiveSubscription } from '@/lib/billing';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -16,9 +15,6 @@ export async function createRecord(formData: FormData) {
   const session = await auth();
   if (!session?.user) {
     return { error: 'Unauthorized' };
-  }
-  if (!(await requireActiveSubscription(session.user.organizationId))) {
-    return { error: 'Subscription inactive. Add billing to continue.' };
   }
 
   const entityTypeId = String(formData.get('entityTypeId') || '').trim();
@@ -126,9 +122,6 @@ export async function approveRecord(
   const session = await auth();
   if (!session?.user) {
     return { error: 'Unauthorized' };
-  }
-  if (!(await requireActiveSubscription(session.user.organizationId))) {
-    return { error: 'Subscription inactive. Add billing to continue.' };
   }
 
   const rawComment = String(formData.get('comment') || '').trim();
@@ -280,9 +273,6 @@ export async function rejectRecord(
   const session = await auth();
   if (!session?.user) {
     return { error: 'Unauthorized' };
-  }
-  if (!(await requireActiveSubscription(session.user.organizationId))) {
-    return { error: 'Subscription inactive. Add billing to continue.' };
   }
 
   const rawComment = String(formData.get('comment') || '').trim();
