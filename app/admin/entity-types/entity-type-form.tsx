@@ -156,7 +156,7 @@ export default function EntityTypeForm() {
                     type="checkbox"
                     checked={createRoles.includes(role)}
                     onChange={() => toggleRole(role)}
-                    className="h-4 w-4 rounded border-white/20 bg-black"
+                    className="glue-checkbox"
                   />
                   {role}
                 </label>
@@ -232,7 +232,7 @@ export default function EntityTypeForm() {
                       type="checkbox"
                       checked={field.required}
                       onChange={(event) => updateField(field.id, { required: event.target.checked })}
-                      className="h-4 w-4 rounded border-white/20 bg-black"
+                      className="glue-checkbox"
                       {...(index === 0 ? { "data-tour": "entity-field-required" } : {})}
                     />
                     Required

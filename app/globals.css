@@ -147,6 +147,16 @@
 }
 
 @layer components {
+  .glue-checkbox {
+    @apply h-4 w-4 rounded border border-input bg-background text-primary;
+    accent-color: hsl(var(--primary));
+  }
+
+  .glue-checkbox:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
   .status-badge {
     @apply border text-xs font-medium;
     background-color: hsl(var(--status-draft-bg) / 0.15);

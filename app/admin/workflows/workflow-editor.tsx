@@ -319,7 +319,7 @@ export default function WorkflowEditor({
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleApprover(step.clientId, user.id)}
-                        className="h-4 w-4 rounded border-white/20 bg-black text-emerald-400"
+                        className="glue-checkbox"
                       />
                       <span className="flex-1">
                         {user.name || user.email}{" "}
@@ -365,7 +365,7 @@ export default function WorkflowEditor({
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleEscalationUser(step.clientId, user.id)}
-                        className="h-4 w-4 rounded border-white/20 bg-black text-amber-400"
+                        className="glue-checkbox"
                       />
                       <span className="flex-1">
                         {user.name || user.email}{" "}
@@ -380,7 +380,7 @@ export default function WorkflowEditor({
                   type="checkbox"
                   checked={step.autoEscalate}
                   onChange={() => toggleAutoEscalate(step.clientId)}
-                  className="h-4 w-4 rounded border-white/20 bg-black text-amber-400"
+                  className="glue-checkbox"
                   {...(index === 0 ? { "data-tour": "workflow-auto-escalate" } : {})}
                 />
                 Auto-escalate by adding escalation users as approvers.
