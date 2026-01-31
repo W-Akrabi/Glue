@@ -80,8 +80,8 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
+    <div className="min-h-screen bg-background text-white">
+      <nav className="fixed top-0 w-full z-50 bg-card/80 backdrop-blur-md border-b border-white/10">
         <div className="w-full px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
@@ -106,7 +106,7 @@ export default function Home() {
         </div>
 
         {isMenuOpen ? (
-          <div className="md:hidden border-t border-white/10 bg-black/95">
+          <div className="md:hidden border-t border-white/10 bg-card/95">
             <div className="px-6 py-4 flex flex-col gap-4 text-sm">
               <a href="#home" className="hover:text-gray-300 transition">Home</a>
               <a href="#platform" className="hover:text-gray-300 transition">Platform</a>
@@ -193,7 +193,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 mb-32">
             <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-8">
               <div className="mb-8">
-                <div className="bg-black/60 rounded-xl p-6 mb-6 border border-white/10">
+                <div className="bg-card/60 rounded-xl p-6 mb-6 border border-white/10">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <CheckIcon className="w-5 h-5 text-emerald-400" />
@@ -260,7 +260,7 @@ export default function Home() {
               <p className="text-gray-400 text-sm mb-6">
                 “We need a new vendor contract approved by Friday and aligned with security requirements.”
               </p>
-              <div className="bg-black/60 rounded-lg p-6 border border-white/10">
+              <div className="bg-card/60 rounded-lg p-6 border border-white/10">
                 <p className="text-sm leading-relaxed text-gray-300">
                   Summary: Security + Legal approvals required.<br />
                   Owner: Ops team • SLA: 24 hours.<br />
@@ -277,7 +277,7 @@ export default function Home() {
                   <TrendingUpIcon className="w-5 h-5 text-emerald-300" />
                   <span className="text-sm font-semibold">Approval velocity</span>
                 </div>
-                <div className="bg-black/60 rounded-lg p-4 space-y-3">
+                <div className="bg-card/60 rounded-lg p-4 space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Median time to approve</span>
                     <span className="text-emerald-300">↓ 38%</span>
@@ -336,7 +336,7 @@ export default function Home() {
 
             <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-8">
               <div className="space-y-4">
-                <div className="flex items-center gap-3 bg-black/60 rounded-lg p-4 border border-white/10">
+                <div className="flex items-center gap-3 bg-card/60 rounded-lg p-4 border border-white/10">
                   <MailIcon className="w-5 h-5 text-emerald-300" />
                   <div className="flex-1">
                     <div className="font-semibold text-sm">Approval emails</div>
@@ -344,7 +344,7 @@ export default function Home() {
                   </div>
                   <ArrowRightIcon className="w-4 h-4 text-gray-500" />
                 </div>
-                <div className="flex items-center gap-3 bg-black/60 rounded-lg p-4 border border-white/10">
+                <div className="flex items-center gap-3 bg-card/60 rounded-lg p-4 border border-white/10">
                   <CalendarIcon className="w-5 h-5 text-emerald-300" />
                   <div className="flex-1">
                     <div className="font-semibold text-sm">SLA reminders</div>
@@ -352,7 +352,7 @@ export default function Home() {
                   </div>
                   <ArrowRightIcon className="w-4 h-4 text-gray-500" />
                 </div>
-                <div className="flex items-center gap-3 bg-black/60 rounded-lg p-4 border border-white/10">
+                <div className="flex items-center gap-3 bg-card/60 rounded-lg p-4 border border-white/10">
                   <MessageSquareIcon className="w-5 h-5 text-emerald-300" />
                   <div className="flex-1">
                     <div className="font-semibold text-sm">Slack approvals</div>
@@ -415,7 +415,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-neutral-900/70 p-10">
+            <div className="rounded-3xl border border-white/10 bg-card/70 p-10">
               <p className="text-sm text-gray-400 mb-4">Ready to start?</p>
               <h3 className="text-2xl font-semibold mb-4">Activate in minutes</h3>
               <p className="text-gray-400 mb-8">

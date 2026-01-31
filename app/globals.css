@@ -105,35 +105,35 @@
     @apply bg-background text-foreground font-sans;
   }
 
-  :root[data-theme='light'] .bg-black {
+  :root[data-theme='light'] .bg-background {
     background-color: hsl(var(--background)) !important;
   }
 
-  :root[data-theme='light'] .bg-black\/30 {
+  :root[data-theme='light'] .bg-background\/30 {
     background-color: hsl(var(--card) / 0.5) !important;
   }
 
-  :root[data-theme='light'] .bg-black\/40 {
+  :root[data-theme='light'] .bg-background\/40 {
     background-color: hsl(var(--card) / 0.65) !important;
   }
 
-  :root[data-theme='light'] .bg-black\/50 {
+  :root[data-theme='light'] .bg-background\/50 {
     background-color: hsl(var(--card) / 0.7) !important;
   }
 
-  :root[data-theme='light'] .bg-black\/60 {
+  :root[data-theme='light'] .bg-background\/60 {
     background-color: hsl(var(--card) / 0.78) !important;
   }
 
-  :root[data-theme='light'] .bg-black\/70 {
+  :root[data-theme='light'] .bg-background\/70 {
     background-color: hsl(var(--card) / 0.85) !important;
   }
 
-  :root[data-theme='light'] .bg-black\/80 {
+  :root[data-theme='light'] .bg-background\/80 {
     background-color: hsl(var(--card) / 0.9) !important;
   }
 
-  :root[data-theme='light'] .bg-black\/95 {
+  :root[data-theme='light'] .bg-background\/95 {
     background-color: hsl(var(--card) / 0.98) !important;
   }
 

@@ -71,7 +71,7 @@ export default function AppShell({
                   defaultValue={search.value}
                   placeholder={search.placeholder || 'Search'}
                   data-tour="header-search"
-                  className="h-10 w-full rounded-full border border-white/10 bg-black/40 pl-10 pr-4 text-sm text-white placeholder:text-gray-500"
+                  className="h-10 w-full rounded-full border border-white/10 bg-card/40 pl-10 pr-4 text-sm text-white placeholder:text-gray-500"
                 />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">⌕</span>
               </form>
@@ -178,7 +178,7 @@ export default function AppShell({
               </>
             ) : null}
           </nav>
-          <div className="mt-4 rounded-xl border border-white/10 bg-black/40 p-3 text-xs text-gray-400">
+          <div className="mt-4 rounded-xl border border-white/10 bg-card/40 p-3 text-xs text-gray-400">
             <p className="font-semibold text-gray-300">Need help?</p>
             <p className="mt-1">Define workflows and assign approvers to keep approvals moving.</p>
           </div>

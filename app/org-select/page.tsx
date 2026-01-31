@@ -27,7 +27,7 @@ export default async function OrgSelectPage() {
         topAction={{ label: 'Create', href: '/requests/new' }}
       >
         <div className="max-w-md">
-          <Card className="border-white/10 bg-neutral-900/80">
+          <Card className="border-white/10 bg-card/80">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Organization not found</CardTitle>
             </CardHeader>
@@ -85,7 +85,7 @@ export default async function OrgSelectPage() {
     >
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
-          <Card className="border-white/10 bg-neutral-900/70" data-tour="org-team">
+          <Card className="border-white/10 bg-card/70" data-tour="org-team">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Organization overview</CardTitle>
             </CardHeader>
@@ -120,7 +120,7 @@ export default async function OrgSelectPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-neutral-900/70" data-tour="org-activity">
+          <Card className="border-white/10 bg-card/70" data-tour="org-activity">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Team directory</CardTitle>
             </CardHeader>
@@ -132,7 +132,7 @@ export default async function OrgSelectPage() {
                   {members.map((member) => (
                     <div
                       key={member.id}
-                      className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-white/10 bg-black/40 p-4"
+                      className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-white/10 bg-card/40 p-4"
                     >
                       <div>
                         <p className="text-sm font-medium">{member.name || member.email}</p>
@@ -162,7 +162,7 @@ export default async function OrgSelectPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-neutral-900/70" data-tour="org-billing">
+          <Card className="border-white/10 bg-card/70" data-tour="org-billing">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Recent activity</CardTitle>
             </CardHeader>
@@ -173,7 +173,7 @@ export default async function OrgSelectPage() {
                 activityLogs.map((log) => (
                   <div
                     key={log.id}
-                    className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-white/10 bg-black/40 p-4"
+                    className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-white/10 bg-card/40 p-4"
                   >
                     <div>
                       <p className="text-sm">
@@ -205,12 +205,12 @@ export default async function OrgSelectPage() {
         </div>
 
         <div className="space-y-6">
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-card/70">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Billing & plan</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border border-white/10 bg-black/40 p-4">
+              <div className="rounded-lg border border-white/10 bg-card/40 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Plan status</p>
                 <p className="mt-2 text-sm font-medium capitalize">{organization.subscriptionStatus}</p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -218,7 +218,7 @@ export default async function OrgSelectPage() {
                 </p>
               </div>
 
-              <div className="rounded-lg border border-white/10 bg-black/40 p-4">
+              <div className="rounded-lg border border-white/10 bg-card/40 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Billing method</p>
                 {organization.billingCardLast4 ? (
                   <>

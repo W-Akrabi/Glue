@@ -245,12 +245,12 @@ export default async function RequestsPage({
             name="q"
             defaultValue={query}
             placeholder="Search titles, descriptions, people, entity types..."
-            className="h-10 min-w-[220px] flex-1 rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+            className="h-10 min-w-[220px] flex-1 rounded-md border border-white/10 bg-background px-3 text-sm text-white"
           />
           <select
             name="status"
             defaultValue={statusFilter}
-            className="h-10 rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+            className="h-10 rounded-md border border-white/10 bg-background px-3 text-sm text-white"
           >
             <option value="all">All statuses</option>
             {statusOptions.map((status) => (
@@ -262,7 +262,7 @@ export default async function RequestsPage({
           <select
             name="entityType"
             defaultValue={entityTypeFilter}
-            className="h-10 rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+            className="h-10 rounded-md border border-white/10 bg-background px-3 text-sm text-white"
           >
             <option value="all">All entity types</option>
             {entityTypes.map((type) => (
@@ -281,7 +281,7 @@ export default async function RequestsPage({
         </form>
 
         <div
-          className="bg-neutral-900/70 border border-white/10 rounded-lg overflow-hidden"
+          className="bg-card/70 border border-white/10 rounded-lg overflow-hidden"
           data-tour="requests-table"
         >
           {filteredRequests.length === 0 ? (

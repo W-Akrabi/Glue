@@ -38,7 +38,7 @@ export default function ProfileForm({ name, email, avatarUrl }: ProfileFormProps
   return (
     <form action={formAction} className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="relative h-16 w-16 overflow-hidden rounded-full border border-white/10 bg-black/40">
+        <div className="relative h-16 w-16 overflow-hidden rounded-full border border-white/10 bg-card/40">
           {avatarUrl ? (
             <Image src={avatarUrl} alt="Profile" fill className="object-cover" />
           ) : (

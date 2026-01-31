@@ -524,7 +524,7 @@ export default function InteractiveTour({ role }: { role: string }) {
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-card/60" />
       <div
         className="absolute rounded-xl border border-emerald-400/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)]"
         style={highlightStyle}

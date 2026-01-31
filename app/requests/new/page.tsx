@@ -32,7 +32,7 @@ export default async function NewRequestPage() {
       topAction={{ label: 'Create', href: '/requests/new' }}
     >
       <div className="max-w-3xl">
-        <Card className="border-white/10 bg-neutral-900/70">
+        <Card className="border-white/10 bg-card/70">
           <CardHeader>
             <CardTitle>Create New Record</CardTitle>
           </CardHeader>

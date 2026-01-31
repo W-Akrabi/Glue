@@ -32,7 +32,7 @@ export default async function SettingsPage() {
       headerSubtitle="Account / Glue"
     >
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <Card className="border-white/10 bg-neutral-900/70">
+        <Card className="border-white/10 bg-card/70">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Profile</CardTitle>
           </CardHeader>
@@ -41,13 +41,13 @@ export default async function SettingsPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-xs uppercase tracking-[0.2em] text-gray-500">Role</label>
-                <div className="rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm">
+                <div className="rounded-md border border-white/10 bg-card/40 px-3 py-2 text-sm">
                   {user.role}
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-xs uppercase tracking-[0.2em] text-gray-500">Organization</label>
-                <div className="rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm">
+                <div className="rounded-md border border-white/10 bg-card/40 px-3 py-2 text-sm">
                   {user.organization?.name || '—'}
                 </div>
               </div>
@@ -56,7 +56,7 @@ export default async function SettingsPage() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-card/70">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Security</CardTitle>
             </CardHeader>
@@ -65,7 +65,7 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-card/70">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Interactive tour</CardTitle>
             </CardHeader>
@@ -77,7 +77,7 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-card/70">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Appearance</CardTitle>
             </CardHeader>

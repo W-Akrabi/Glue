@@ -39,7 +39,7 @@ export default function RecordForm({ entityTypes }: RecordFormProps) {
         <select
           id="entity-type"
           name="entityTypeId"
-          className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           value={selectedId}
           onChange={(event) => setSelectedId(event.target.value)}
           required
@@ -71,7 +71,7 @@ export default function RecordForm({ entityTypes }: RecordFormProps) {
             ) : field.type === "select" ? (
               <select
                 {...commonProps}
-                className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Select…</option>
                 {(field.options || []).map((option) => (

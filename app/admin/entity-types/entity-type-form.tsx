@@ -21,7 +21,7 @@ const ROLE_OPTIONS = ["MEMBER", "ADMIN"] as const;
 export default function EntityTypeForm() {
   const [fields, setFields] = useState<FieldDraft[]>([
     {
-      id: crypto.randomUUID(),
+      id: "field-1",
       key: "title",
       label: "Title",
       type: "text",
@@ -64,7 +64,7 @@ export default function EntityTypeForm() {
     setFields((prev) => [
       ...prev,
       {
-        id: crypto.randomUUID(),
+        id: `field-${prev.length + 1}-${crypto.randomUUID()}`,
         key: "",
         label: "",
         type: "text",
@@ -94,7 +94,7 @@ export default function EntityTypeForm() {
       <input type="hidden" name="fields" value={fieldPayload} />
       <input type="hidden" name="createRoles" value={createRoles.join(",")} />
 
-      <Card className="border-white/10 bg-black/40" data-tour="entity-basics">
+      <Card className="border-white/10 bg-card/40" data-tour="entity-basics">
         <CardContent className="space-y-6 p-6">
           <div className="space-y-2">
             <Label htmlFor="name">Entity type name</Label>
@@ -102,7 +102,7 @@ export default function EntityTypeForm() {
               id="name"
               name="name"
               data-tour="entity-name"
-              className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               placeholder="Purchase Request"
               required
             />
@@ -117,7 +117,7 @@ export default function EntityTypeForm() {
                 value={titleField}
                 onChange={(event) => setTitleField(event.target.value)}
                 data-tour="entity-title-field"
-                className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Select a field</option>
                 {keyOptions.map((key) => (
@@ -135,7 +135,7 @@ export default function EntityTypeForm() {
                 value={descriptionField}
                 onChange={(event) => setDescriptionField(event.target.value)}
                 data-tour="entity-description-field"
-                className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Select a field</option>
                 {keyOptions.map((key) => (
@@ -183,14 +183,14 @@ export default function EntityTypeForm() {
           {fields.map((field, index) => (
             <Card
               key={field.id}
-              className="border-white/10 bg-black/40"
+              className="border-white/10 bg-card/40"
               {...(index === 0 ? { "data-tour": "entity-field-card" } : {})}
             >
               <CardContent className="grid gap-4 p-4 md:grid-cols-6">
                 <div className="space-y-1 md:col-span-2">
                   <Label>Key</Label>
                   <input
-                    className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+                    className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white"
                     value={field.key}
                     onChange={(event) => updateField(field.id, { key: event.target.value })}
                     placeholder="title"
@@ -201,7 +201,7 @@ export default function EntityTypeForm() {
                 <div className="space-y-1 md:col-span-2">
                   <Label>Label</Label>
                   <input
-                    className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+                    className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white"
                     value={field.label}
                     onChange={(event) => updateField(field.id, { label: event.target.value })}
                     placeholder="Title"
@@ -212,7 +212,7 @@ export default function EntityTypeForm() {
                 <div className="space-y-1 md:col-span-1">
                   <Label>Type</Label>
                   <select
-                    className="h-10 w-full rounded-md border border-white/10 bg-black px-2 text-sm text-white"
+                    className="h-10 w-full rounded-md border border-white/10 bg-background px-2 text-sm text-white"
                     value={field.type}
                     onChange={(event) =>
                       updateField(field.id, { type: event.target.value as FieldDraft["type"] })
@@ -251,7 +251,7 @@ export default function EntityTypeForm() {
                 <div className="space-y-1 md:col-span-3">
                   <Label>Placeholder</Label>
                   <input
-                    className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+                    className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white"
                     value={field.placeholder}
                     onChange={(event) => updateField(field.id, { placeholder: event.target.value })}
                     placeholder="Short summary"
@@ -262,7 +262,7 @@ export default function EntityTypeForm() {
                   <div className="space-y-1 md:col-span-3">
                     <Label>Options (comma separated)</Label>
                     <input
-                      className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white"
+                      className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white"
                       value={field.options}
                       onChange={(event) => updateField(field.id, { options: event.target.value })}
                       placeholder="Hardware, Software"

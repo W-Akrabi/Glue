@@ -52,7 +52,7 @@ export default function UserMenu({ name, email, role, avatarUrl }: UserMenuProps
     <div className="relative" ref={menuRef}>
       <button
         type="button"
-        className="flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-2 py-1.5 text-left text-sm hover:border-white/20"
+        className="flex items-center gap-2 rounded-full border border-white/10 bg-card/40 px-2 py-1.5 text-left text-sm hover:border-white/20"
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -77,7 +77,7 @@ export default function UserMenu({ name, email, role, avatarUrl }: UserMenuProps
         role="menu"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="rounded-lg border border-white/10 bg-black/40 p-3">
+        <div className="rounded-lg border border-white/10 bg-card/40 p-3">
           <p className="text-sm font-medium text-white">{name || "User"}</p>
           <p className="text-xs text-gray-400">{email}</p>
           <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-gray-500">{role}</p>

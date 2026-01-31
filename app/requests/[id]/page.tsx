@@ -144,7 +144,7 @@ export default async function RequestDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-card/70">
             <CardHeader className="flex-row items-start justify-between space-y-0">
               <CardTitle className="text-2xl font-bold" data-testid="request-title">
                 {title}
@@ -205,7 +205,7 @@ export default async function RequestDetailPage({
             />
           ) : null}
 
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-card/70">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Timeline</CardTitle>
             </CardHeader>
@@ -336,7 +336,7 @@ export default async function RequestDetailPage({
         </div>
 
         <div className="space-y-6">
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-card/70">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Record metadata</CardTitle>
             </CardHeader>

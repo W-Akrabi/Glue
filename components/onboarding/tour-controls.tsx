@@ -1,37 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-
-const STORAGE_PREFIX = "glue:onboarding:v1";
-
-function clearTourStorage() {
-  if (typeof window === "undefined") return;
-  const keys: string[] = [];
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith(STORAGE_PREFIX)) {
-      keys.push(key);
-    }
-  }
-  keys.forEach((key) => localStorage.removeItem(key));
-}
+import { resetOnboarding } from "@/lib/actions/onboarding";
 
 export default function TourControls() {
+  const [pending, setPending] = useState(false);
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <Button
-        onClick={() => {
-          clearTourStorage();
+        onClick={async () => {
+          setPending(true);
+          await resetOnboarding();
           window.location.href = "/dashboard";
         }}
+        disabled={pending}
       >
-        Start full tour
+        {pending ? "Starting…" : "Start full tour"}
       </Button>
       <Button
         variant="outline"
-        onClick={() => {
-          clearTourStorage();
+        onClick={async () => {
+          setPending(true);
+          await resetOnboarding();
+          setPending(false);
         }}
+        disabled={pending}
       >
         Reset tour progress
       </Button>
