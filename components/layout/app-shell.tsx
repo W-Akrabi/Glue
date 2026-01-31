@@ -42,7 +42,7 @@ export default function AppShell({
   return (
     <div className="min-h-screen bg-[#0f1115] text-white">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#141821]/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-sky-400" />
             <div>
@@ -52,7 +52,7 @@ export default function AppShell({
           </div>
 
           {search ? (
-            <div className="hidden flex-1 items-center gap-3 md:flex md:max-w-xl">
+            <div className="hidden flex-1 items-center gap-3 md:flex">
               <form method="get" className="relative w-full">
                 <input
                   type="search"
@@ -92,7 +92,7 @@ export default function AppShell({
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex w-full gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <aside className="hidden w-56 shrink-0 flex-col gap-3 rounded-2xl border border-white/10 bg-[#141821] p-4 lg:flex">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Workspace</p>
           <nav className="space-y-1 text-sm">

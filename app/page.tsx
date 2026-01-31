@@ -82,7 +82,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
       <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="w-full px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
             <span className="text-xl font-bold tracking-tight">Glue</span>
@@ -126,7 +126,7 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[28rem] h-[28rem] bg-emerald-500/25 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-10 right-10 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl"></div>
 
-        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
+        <div className="relative z-10 text-center px-6 w-full">
           <div className="mb-8 inline-block">
             <span className="bg-emerald-500/15 text-emerald-300 px-4 py-2 rounded-full text-sm border border-emerald-400/30">
               Approval workflows, finally unblocked
@@ -138,7 +138,7 @@ export default function Home() {
             without chasing people.
           </h1>
 
-          <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
+          <p className="text-gray-400 text-lg mb-10 w-full">
             Glue centralizes intake, routing, and audit trails so every request is clear, trackable, and approved on time.
           </p>
 
@@ -178,14 +178,14 @@ export default function Home() {
       </section>
 
       <section id="platform" className="py-32 px-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <div className="text-center mb-20">
             <p className="text-emerald-300 mb-4">Glue Platform</p>
             <h2 className="text-4xl md:text-6xl font-bold mb-6">
               Everything you need to design<br />
               and scale approval workflows
             </h2>
-            <p className="text-gray-400 max-w-3xl mx-auto">
+            <p className="text-gray-400 w-full">
               Route requests by role, automate step-by-step reviews, and keep stakeholders aligned with clear timelines.
             </p>
           </div>
@@ -367,24 +367,24 @@ export default function Home() {
       </section>
 
       <section className="py-32 px-6 border-t border-white/10">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="w-full text-center">
           <p className="text-emerald-300 mb-4">How Glue Works</p>
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
             Simple intake.<br />
             Clear decisions. Faster approvals.
           </h2>
-          <p className="text-gray-400 max-w-3xl mx-auto">
+          <p className="text-gray-400 w-full">
             Centralize requests, assign owners, and track every decision in a single place that scales with your organization.
           </p>
         </div>
       </section>
 
       <section id="pricing" className="py-32 px-6 border-t border-white/10">
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full">
           <div className="text-center mb-16">
             <p className="text-emerald-300 mb-4">Get started</p>
             <h2 className="text-4xl md:text-6xl font-bold mb-6">Launch your org in minutes</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p className="text-gray-400 w-full">
               No billing required. Create an org, invite your team, and start running approvals.
             </p>
           </div>
@@ -441,7 +441,7 @@ export default function Home() {
       </section>
 
       <footer className="py-12 px-6 border-t border-white/10">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
