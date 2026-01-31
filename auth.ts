@@ -40,6 +40,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
               name: user.name,
               role: user.role,
               organizationId: user.organizationId,
+              avatarUrl: user.avatarUrl,
             };
           }
         }
@@ -54,6 +55,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         token.id = user.id;
         token.role = user.role;
         token.organizationId = user.organizationId;
+        token.avatarUrl = user.avatarUrl;
       }
       return token;
     },
@@ -62,6 +64,20 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.organizationId = token.organizationId as string;
+
+        // Always load current profile details so header stays in sync.
+        const user = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { name: true, email: true, avatarUrl: true },
+        });
+        if (user) {
+          session.user.name = user.name;
+          session.user.email = user.email;
+          (session.user as { avatarUrl?: string | null }).avatarUrl = user.avatarUrl;
+        } else {
+          (session.user as { avatarUrl?: string | null }).avatarUrl =
+            (token.avatarUrl as string | null | undefined) ?? null;
+        }
       }
       return session;
     },

@@ -1,7 +1,6 @@
-import { signOut } from '@/auth';
 import { Button } from '@/components/ui/button';
 import InteractiveTour from '@/components/onboarding/interactive-tour';
-import TourLauncher from '@/components/onboarding/tour-launcher';
+import UserMenu from '@/components/layout/user-menu';
 import Link from 'next/link';
 import RightRail from './right-rail';
 import { ReactNode } from 'react';
@@ -11,11 +10,13 @@ export type AppShellProps = {
     user: {
       id: string;
       name?: string | null;
+      email?: string | null;
+      avatarUrl?: string | null;
       role?: string | null;
       organizationId?: string | null;
     };
   };
-  activeNav: 'dashboard' | 'requests' | 'org' | 'admin-entity' | 'admin-workflows';
+  activeNav: 'dashboard' | 'requests' | 'org' | 'admin-entity' | 'admin-workflows' | 'settings';
   headerTitle: string;
   headerSubtitle?: string;
   topAction?: { label: string; href: string };
@@ -82,21 +83,12 @@ export default function AppShell({
                 <Link href={topAction.href}>{topAction.label}</Link>
               </Button>
             ) : null}
-            <div className="text-right">
-              <p className="text-sm font-medium">{session.user.name}</p>
-              <p className="text-xs text-gray-500">{role}</p>
-            </div>
-            <TourLauncher />
-            <form
-              action={async () => {
-                'use server';
-                await signOut({ redirectTo: '/login' });
-              }}
-            >
-              <Button type="submit" variant="ghost" size="sm" data-testid="logout-button">
-                Logout
-              </Button>
-            </form>
+            <UserMenu
+              name={session.user.name}
+              email={session.user.email}
+              role={role}
+              avatarUrl={session.user.avatarUrl}
+            />
           </div>
         </div>
       </header>
