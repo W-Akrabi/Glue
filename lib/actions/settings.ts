@@ -3,9 +3,8 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
 import { revalidatePath } from 'next/cache';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
 export async function updateProfile(
   _prevState: { error?: string; success?: boolean },
@@ -44,13 +43,22 @@ export async function updateProfile(
       return { error: 'Unsupported image format.' };
     }
 
-    const buffer = Buffer.from(await avatarFile.arrayBuffer());
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
-    await mkdir(uploadDir, { recursive: true });
-    const filename = `${session.user.id}-${Date.now()}.${extension}`;
-    const filepath = path.join(uploadDir, filename);
-    await writeFile(filepath, buffer);
-    avatarUrl = `/uploads/avatars/${filename}`;
+    const buffer = await avatarFile.arrayBuffer();
+    const filename = `${session.user.id}/${Date.now()}.${extension}`;
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('avatars')
+      .upload(filename, buffer, {
+        contentType: avatarFile.type,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error('Failed to upload avatar:', uploadError);
+      return { error: 'Failed to upload avatar.' };
+    }
+
+    const { data } = supabaseAdmin.storage.from('avatars').getPublicUrl(filename);
+    avatarUrl = data.publicUrl;
   }
 
   try {
