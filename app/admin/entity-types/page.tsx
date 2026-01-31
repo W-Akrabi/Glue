@@ -31,7 +31,7 @@ export default async function AdminEntityTypesPage() {
       topAction={{ label: 'Create', href: '/requests/new' }}
     >
       <div className="space-y-8">
-        <Card className="border-white/10 bg-neutral-900/70">
+        <Card className="border-white/10 bg-neutral-900/70" data-tour="admin-entity-create">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">Create entity type</CardTitle>
           </CardHeader>
@@ -40,7 +40,7 @@ export default async function AdminEntityTypesPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-neutral-900/70">
+        <Card className="border-white/10 bg-neutral-900/70" data-tour="admin-entity-list">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">Existing entity types</CardTitle>
           </CardHeader>

@@ -28,7 +28,11 @@ export default function ApprovalActions({
   );
 
   return (
-    <Card data-testid="approval-actions" className="border-white/10 bg-neutral-900/70">
+    <Card
+      data-testid="approval-actions"
+      className="border-white/10 bg-neutral-900/70"
+      data-tour="approval-actions"
+    >
       <CardHeader>
         <CardTitle className="text-lg font-semibold">Take Action</CardTitle>
       </CardHeader>

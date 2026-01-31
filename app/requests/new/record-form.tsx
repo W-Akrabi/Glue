@@ -33,7 +33,7 @@ export default function RecordForm({ entityTypes }: RecordFormProps) {
   const hasWorkflow = steps.length > 0;
 
   return (
-    <form action={createRecord} className="space-y-6">
+    <form action={createRecord} className="space-y-6" data-tour="record-form">
       <div className="space-y-2">
         <Label htmlFor="entity-type">Record type</Label>
         <select
@@ -43,6 +43,7 @@ export default function RecordForm({ entityTypes }: RecordFormProps) {
           value={selectedId}
           onChange={(event) => setSelectedId(event.target.value)}
           required
+          data-tour="record-type"
         >
           {entityTypes.map((type) => (
             <option key={type.id} value={type.id}>
@@ -86,7 +87,7 @@ export default function RecordForm({ entityTypes }: RecordFormProps) {
         );
       })}
 
-      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4" data-tour="workflow-preview">
         <p className="text-sm text-emerald-200 font-medium mb-2">Approval Workflow:</p>
         {steps.length === 0 ? (
           <p className="text-sm text-emerald-200/80">No workflow steps configured.</p>
@@ -118,6 +119,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
       type="submit"
       className="flex-1"
       data-testid="submit-request-button"
+      data-tour="record-submit"
       disabled={disabled || pending}
     >
       {pending ? "Submitting…" : "Submit Record"}

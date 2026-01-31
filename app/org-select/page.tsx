@@ -85,7 +85,7 @@ export default async function OrgSelectPage() {
     >
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-neutral-900/70" data-tour="org-team">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Organization overview</CardTitle>
             </CardHeader>
@@ -120,7 +120,7 @@ export default async function OrgSelectPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-neutral-900/70" data-tour="org-activity">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Team directory</CardTitle>
             </CardHeader>
@@ -162,7 +162,7 @@ export default async function OrgSelectPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-neutral-900/70">
+          <Card className="border-white/10 bg-neutral-900/70" data-tour="org-billing">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Recent activity</CardTitle>
             </CardHeader>

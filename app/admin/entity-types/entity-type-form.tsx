@@ -94,13 +94,14 @@ export default function EntityTypeForm() {
       <input type="hidden" name="fields" value={fieldPayload} />
       <input type="hidden" name="createRoles" value={createRoles.join(",")} />
 
-      <Card className="border-white/10 bg-black/40">
+      <Card className="border-white/10 bg-black/40" data-tour="entity-basics">
         <CardContent className="space-y-6 p-6">
           <div className="space-y-2">
             <Label htmlFor="name">Entity type name</Label>
             <input
               id="name"
               name="name"
+              data-tour="entity-name"
               className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               placeholder="Purchase Request"
               required
@@ -115,6 +116,7 @@ export default function EntityTypeForm() {
                 name="titleField"
                 value={titleField}
                 onChange={(event) => setTitleField(event.target.value)}
+                data-tour="entity-title-field"
                 className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Select a field</option>
@@ -132,6 +134,7 @@ export default function EntityTypeForm() {
                 name="descriptionField"
                 value={descriptionField}
                 onChange={(event) => setDescriptionField(event.target.value)}
+                data-tour="entity-description-field"
                 className="h-10 w-full rounded-md border border-white/10 bg-black px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Select a field</option>
@@ -144,7 +147,7 @@ export default function EntityTypeForm() {
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2" data-tour="entity-create-permissions">
             <Label>Create permissions</Label>
             <div className="flex flex-wrap gap-3 text-sm">
               {ROLE_OPTIONS.map((role) => (
@@ -163,16 +166,26 @@ export default function EntityTypeForm() {
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
+      <div className="space-y-3" data-tour="entity-fields-list">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">Fields</h3>
-          <Button type="button" variant="secondary" size="sm" onClick={addField}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={addField}
+            data-tour="entity-add-field"
+          >
             Add field
           </Button>
         </div>
         <div className="space-y-4">
-          {fields.map((field) => (
-            <Card key={field.id} className="border-white/10 bg-black/40">
+          {fields.map((field, index) => (
+            <Card
+              key={field.id}
+              className="border-white/10 bg-black/40"
+              {...(index === 0 ? { "data-tour": "entity-field-card" } : {})}
+            >
               <CardContent className="grid gap-4 p-4 md:grid-cols-6">
                 <div className="space-y-1 md:col-span-2">
                   <Label>Key</Label>
@@ -182,6 +195,7 @@ export default function EntityTypeForm() {
                     onChange={(event) => updateField(field.id, { key: event.target.value })}
                     placeholder="title"
                     required
+                    {...(index === 0 ? { "data-tour": "entity-field-key" } : {})}
                   />
                 </div>
                 <div className="space-y-1 md:col-span-2">
@@ -192,6 +206,7 @@ export default function EntityTypeForm() {
                     onChange={(event) => updateField(field.id, { label: event.target.value })}
                     placeholder="Title"
                     required
+                    {...(index === 0 ? { "data-tour": "entity-field-label" } : {})}
                   />
                 </div>
                 <div className="space-y-1 md:col-span-1">
@@ -202,6 +217,7 @@ export default function EntityTypeForm() {
                     onChange={(event) =>
                       updateField(field.id, { type: event.target.value as FieldDraft["type"] })
                     }
+                    {...(index === 0 ? { "data-tour": "entity-field-type" } : {})}
                   >
                     <option value="text">Text</option>
                     <option value="textarea">Textarea</option>
@@ -217,6 +233,7 @@ export default function EntityTypeForm() {
                       checked={field.required}
                       onChange={(event) => updateField(field.id, { required: event.target.checked })}
                       className="h-4 w-4 rounded border-white/20 bg-black"
+                      {...(index === 0 ? { "data-tour": "entity-field-required" } : {})}
                     />
                     Required
                   </label>
@@ -238,6 +255,7 @@ export default function EntityTypeForm() {
                     value={field.placeholder}
                     onChange={(event) => updateField(field.id, { placeholder: event.target.value })}
                     placeholder="Short summary"
+                    {...(index === 0 ? { "data-tour": "entity-field-placeholder" } : {})}
                   />
                 </div>
                 {field.type === "select" ? (
@@ -248,6 +266,7 @@ export default function EntityTypeForm() {
                       value={field.options}
                       onChange={(event) => updateField(field.id, { options: event.target.value })}
                       placeholder="Hardware, Software"
+                      {...(index === 0 ? { "data-tour": "entity-field-options" } : {})}
                     />
                   </div>
                 ) : null}
@@ -258,7 +277,9 @@ export default function EntityTypeForm() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit">Create entity type</Button>
+        <Button type="submit" data-tour="entity-submit">
+          Create entity type
+        </Button>
         {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
         {state?.success ? <p className="text-sm text-emerald-300">Entity type created.</p> : null}
       </div>

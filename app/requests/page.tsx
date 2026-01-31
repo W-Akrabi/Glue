@@ -188,7 +188,7 @@ export default async function RequestsPage({
               Track approvals you need to action and the records you submitted.
             </p>
           </div>
-          <Button asChild data-testid="create-request-button">
+          <Button asChild data-testid="create-request-button" data-tour="requests-create">
             <Link href="/requests/new">+ New Record</Link>
           </Button>
         </div>
@@ -240,7 +240,7 @@ export default async function RequestsPage({
           </Link>
         </div>
 
-        <form method="get" className="flex flex-wrap items-center gap-3">
+        <form method="get" className="flex flex-wrap items-center gap-3" data-tour="requests-filters">
           <input
             name="q"
             defaultValue={query}
@@ -280,7 +280,10 @@ export default async function RequestsPage({
           </Link>
         </form>
 
-        <div className="bg-neutral-900/70 border border-white/10 rounded-lg overflow-hidden">
+        <div
+          className="bg-neutral-900/70 border border-white/10 rounded-lg overflow-hidden"
+          data-tour="requests-table"
+        >
           {filteredRequests.length === 0 ? (
             <div className="px-6 py-12 text-center text-muted-foreground">
               <p className="mb-4">No records found</p>

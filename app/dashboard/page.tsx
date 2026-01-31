@@ -101,7 +101,7 @@ export default async function DashboardPage({
       topAction={{ label: 'Create', href: '/requests/new' }}
       search={{ name: 'q', value: query, placeholder: 'Search records, people, or entities' }}
     >
-      <div className="mb-5 flex flex-wrap items-center gap-3">
+      <div className="mb-5 flex flex-wrap items-center gap-3" data-tour="dashboard-kpis">
         <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-gray-300">
           <span className="h-2 w-2 rounded-full bg-amber-400" /> Pending {pendingCount}
         </div>
@@ -117,7 +117,7 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      <Card className="border-white/10 bg-[#141821]">
+      <Card className="border-white/10 bg-[#141821]" data-tour="dashboard-records">
         <CardContent className="p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
             <div>

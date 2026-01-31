@@ -1,5 +1,7 @@
 import { signOut } from '@/auth';
 import { Button } from '@/components/ui/button';
+import InteractiveTour from '@/components/onboarding/interactive-tour';
+import TourLauncher from '@/components/onboarding/tour-launcher';
 import Link from 'next/link';
 import RightRail from './right-rail';
 import { ReactNode } from 'react';
@@ -59,6 +61,7 @@ export default function AppShell({
                   name={search.name}
                   defaultValue={search.value}
                   placeholder={search.placeholder || 'Search'}
+                  data-tour="header-search"
                   className="h-10 w-full rounded-full border border-white/10 bg-black/40 pl-10 pr-4 text-sm text-white placeholder:text-gray-500"
                 />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">⌕</span>
@@ -70,7 +73,12 @@ export default function AppShell({
 
           <div className="flex items-center gap-3">
             {topAction ? (
-              <Button asChild size="sm" className="bg-emerald-400 text-black hover:bg-emerald-300">
+              <Button
+                asChild
+                size="sm"
+                className="bg-emerald-400 text-black hover:bg-emerald-300"
+                data-tour="header-create"
+              >
                 <Link href={topAction.href}>{topAction.label}</Link>
               </Button>
             ) : null}
@@ -78,6 +86,7 @@ export default function AppShell({
               <p className="text-sm font-medium">{session.user.name}</p>
               <p className="text-xs text-gray-500">{role}</p>
             </div>
+            <TourLauncher />
             <form
               action={async () => {
                 'use server';
@@ -98,6 +107,7 @@ export default function AppShell({
           <nav className="space-y-1 text-sm">
             <Link
               href="/dashboard"
+              data-tour="nav-dashboard"
               className={`${navLinkBase} ${
                 activeNav === 'dashboard'
                   ? 'bg-white/5 text-emerald-200'
@@ -109,6 +119,7 @@ export default function AppShell({
             </Link>
             <Link
               href="/requests"
+              data-tour="nav-records"
               className={`${navLinkBase} ${
                 activeNav === 'requests'
                   ? 'bg-white/5 text-emerald-200'
@@ -121,6 +132,7 @@ export default function AppShell({
             {role !== 'VIEWER' ? (
               <Link
                 href="/requests/new"
+                data-tour="nav-new-record"
                 className={`${navLinkBase} text-gray-400 hover:bg-white/5 hover:text-white`}
               >
                 <span>✏️</span>
@@ -129,6 +141,7 @@ export default function AppShell({
             ) : null}
             <Link
               href="/org-select"
+              data-tour="nav-org"
               className={`${navLinkBase} ${
                 activeNav === 'org' ? 'bg-white/5 text-emerald-200' : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
@@ -140,6 +153,7 @@ export default function AppShell({
               <>
                 <Link
                   href="/admin/entity-types"
+                  data-tour="nav-entity-types"
                   className={`${navLinkBase} ${
                     activeNav === 'admin-entity'
                       ? 'bg-white/5 text-emerald-200'
@@ -151,6 +165,7 @@ export default function AppShell({
                 </Link>
                 <Link
                   href="/admin/workflows"
+                  data-tour="nav-workflows"
                   className={`${navLinkBase} ${
                     activeNav === 'admin-workflows'
                       ? 'bg-white/5 text-emerald-200'
@@ -177,6 +192,7 @@ export default function AppShell({
             )
           : null}
       </div>
+      <InteractiveTour role={role} />
     </div>
   );
 }

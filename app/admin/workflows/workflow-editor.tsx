@@ -189,7 +189,7 @@ export default function WorkflowEditor({
       <input type="hidden" name="steps" value={payload} />
       <input type="hidden" name="entityTypeId" value={entityTypeId} />
 
-      <div className="space-y-2">
+      <div className="space-y-2" data-tour="workflow-entity-type">
         <Label htmlFor="entity-type">Entity type</Label>
         <select
           id="entity-type"
@@ -241,6 +241,7 @@ export default function WorkflowEditor({
           onDragStart={() => handleDragStart(step.clientId)}
           onDragOver={handleDragOver}
           onDrop={() => handleDrop(step.clientId)}
+          {...(index === 0 ? { "data-tour": "workflow-step-card" } : {})}
         >
           <CardContent className="p-4 space-y-4">
             <div className="flex items-center justify-between">
@@ -287,6 +288,7 @@ export default function WorkflowEditor({
                 className="h-10 w-full rounded-md border border-white/10 bg-black px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={step.role}
                 onChange={(event) => updateRole(step.clientId, event.target.value)}
+                {...(index === 0 ? { "data-tour": "workflow-role" } : {})}
               >
                 {ROLE_OPTIONS.map((role) => (
                   <option key={role} value={role}>
@@ -296,7 +298,7 @@ export default function WorkflowEditor({
               </select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2" {...(index === 0 ? { "data-tour": "workflow-approvers" } : {})}>
               <Label>Assigned approvers</Label>
               {users.filter((user) => user.role === step.role).length === 0 ? (
                 <p className="text-xs text-amber-200/80">
@@ -344,11 +346,12 @@ export default function WorkflowEditor({
                 placeholder="e.g. 48"
                 value={step.slaHours}
                 onChange={(event) => updateSlaHours(step.clientId, event.target.value)}
+                {...(index === 0 ? { "data-tour": "workflow-sla" } : {})}
               />
               <p className="text-xs text-gray-400">Leave empty to disable SLA tracking.</p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2" {...(index === 0 ? { "data-tour": "workflow-escalation" } : {})}>
               <Label>Escalate to</Label>
               <div className="grid gap-2 sm:grid-cols-2">
                 {users.map((user) => {
@@ -378,6 +381,7 @@ export default function WorkflowEditor({
                   checked={step.autoEscalate}
                   onChange={() => toggleAutoEscalate(step.clientId)}
                   className="h-4 w-4 rounded border-white/20 bg-black text-amber-400"
+                  {...(index === 0 ? { "data-tour": "workflow-auto-escalate" } : {})}
                 />
                 Auto-escalate by adding escalation users as approvers.
               </label>
@@ -387,10 +391,12 @@ export default function WorkflowEditor({
       ))}
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="button" variant="secondary" onClick={addStep}>
+        <Button type="button" variant="secondary" onClick={addStep} data-tour="workflow-add-step">
           Add step
         </Button>
-        <Button type="submit">Save workflow</Button>
+        <Button type="submit" data-tour="workflow-save">
+          Save workflow
+        </Button>
         {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
         {state?.success && <p className="text-sm text-emerald-300">Workflow updated.</p>}
       </div>

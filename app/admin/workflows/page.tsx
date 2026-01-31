@@ -40,7 +40,7 @@ export default async function AdminWorkflowsPage() {
       topAction={{ label: 'Create', href: '/requests/new' }}
     >
       <div className="space-y-8">
-        <Card className="border-white/10 bg-neutral-900/70">
+        <Card className="border-white/10 bg-neutral-900/70" data-tour="admin-workflow-editor">
           <CardHeader className="flex flex-row items-start justify-between space-y-0">
             <div>
               <CardTitle className="text-xl font-semibold">Workflow definitions</CardTitle>
@@ -68,7 +68,7 @@ export default async function AdminWorkflowsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-neutral-900/70">
+        <Card className="border-white/10 bg-neutral-900/70" data-tour="admin-workflow-sla">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">SLA tracking</CardTitle>
             <p className="text-sm text-muted-foreground">
