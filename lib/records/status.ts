@@ -14,10 +14,10 @@ const STATUS_LABELS: Record<RecordStatus, string> = {
 };
 
 const STATUS_BADGE_CLASSES: Record<RecordStatus, string> = {
-  DRAFT: 'bg-slate-500/10 text-slate-200 border-slate-500/30',
-  PENDING_APPROVAL: 'bg-amber-500/10 text-amber-200 border-amber-500/30',
-  APPROVED: 'bg-emerald-500/10 text-emerald-200 border-emerald-500/30',
-  REJECTED: 'bg-rose-500/10 text-rose-200 border-rose-500/30',
+  DRAFT: 'status-badge status-badge--draft',
+  PENDING_APPROVAL: 'status-badge status-badge--pending',
+  APPROVED: 'status-badge status-badge--approved',
+  REJECTED: 'status-badge status-badge--rejected',
 };
 
 export function normalizeRecordStatus(status: string): RecordStatus | undefined {

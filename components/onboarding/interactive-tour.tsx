@@ -532,7 +532,7 @@ export default function InteractiveTour({ role }: { role: string }) {
       <div
         ref={tooltipRef}
         className={cn(
-          "absolute rounded-xl border border-white/10 bg-[#141821] p-4 text-white shadow-xl",
+          "absolute rounded-xl border border-white/10 bg-card p-4 text-white shadow-xl",
           "backdrop-blur"
         )}
         style={tooltipStyle}

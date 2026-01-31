@@ -70,14 +70,14 @@ export default async function RightRail({
 
   return (
     <div className="hidden w-80 shrink-0 flex-col gap-6 lg:flex">
-      <Card className="border-white/10 bg-[#141821]">
+      <Card className="border-white/10 bg-card">
         <div className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Insights</p>
               <h3 className="text-lg font-semibold">Approval momentum</h3>
             </div>
-            <span className="text-xs text-emerald-300">{approvalRate}%</span>
+            <span className="text-xs text-primary">{approvalRate}%</span>
           </div>
           <div className="space-y-3 text-xs text-gray-400">
             <div className="flex items-center justify-between">
@@ -93,13 +93,13 @@ export default async function RightRail({
               <span className="text-white">{rejectedCount}</span>
             </div>
           </div>
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200">
+          <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-xs text-foreground">
             Keep momentum high by clearing the approvals waiting on you.
           </div>
         </div>
       </Card>
 
-      <Card className="border-white/10 bg-[#141821]">
+      <Card className="border-white/10 bg-card">
         <div className="px-6 py-4 border-b border-white/10">
           <h2 className="text-lg font-semibold">Needs your approval</h2>
           <p className="text-xs text-gray-500 mt-1">{actionable.length} items waiting on you</p>
@@ -123,7 +123,7 @@ export default async function RightRail({
                       <p className="text-sm font-medium">{title}</p>
                       <p className="text-xs text-muted-foreground mt-1">{record.entityType.name}</p>
                     </div>
-                    <span className="text-xs text-emerald-300">Review</span>
+                    <span className="text-xs text-primary">Review</span>
                   </div>
                 </Link>
               );
@@ -132,7 +132,7 @@ export default async function RightRail({
         </div>
       </Card>
 
-      <Card className="border-white/10 bg-[#141821]">
+      <Card className="border-white/10 bg-card">
         <div className="px-6 py-4 border-b border-white/10">
           <h2 className="text-lg font-semibold">Notifications</h2>
           <p className="text-xs text-gray-500 mt-1">Latest SLA reminders</p>

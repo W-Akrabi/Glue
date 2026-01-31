@@ -117,7 +117,7 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      <Card className="border-white/10 bg-[#141821]" data-tour="dashboard-records">
+      <Card className="border-white/10 bg-card" data-tour="dashboard-records">
         <CardContent className="p-0">
           <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
             <div>

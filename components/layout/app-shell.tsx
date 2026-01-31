@@ -4,6 +4,14 @@ import UserMenu from '@/components/layout/user-menu';
 import Link from 'next/link';
 import RightRail from './right-rail';
 import { ReactNode } from 'react';
+import {
+  Building2,
+  FilePlus2,
+  Files,
+  GitBranch,
+  LayoutDashboard,
+  Shapes,
+} from 'lucide-react';
 
 export type AppShellProps = {
   session: {
@@ -43,8 +51,8 @@ export default function AppShell({
   const organizationId = session.user.organizationId || '';
 
   return (
-    <div className="min-h-screen bg-[#0f1115] text-white">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-[#141821]/90 backdrop-blur">
+    <div className="min-h-screen bg-background text-white">
+      <header className="sticky top-0 z-20 border-b border-white/10 bg-background/90 backdrop-blur">
         <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-sky-400" />
@@ -94,7 +102,7 @@ export default function AppShell({
       </header>
 
       <div className="flex w-full gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <aside className="hidden w-56 shrink-0 flex-col gap-3 rounded-2xl border border-white/10 bg-[#141821] p-4 lg:flex">
+        <aside className="hidden w-56 shrink-0 flex-col gap-3 rounded-2xl border border-white/10 bg-card p-4 lg:flex">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Workspace</p>
           <nav className="space-y-1 text-sm">
             <Link
@@ -106,7 +114,7 @@ export default function AppShell({
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <span>🏁</span>
+              <LayoutDashboard className="h-4 w-4" />
               Dashboard
             </Link>
             <Link
@@ -118,7 +126,7 @@ export default function AppShell({
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <span>📋</span>
+              <Files className="h-4 w-4" />
               Records
             </Link>
             {role !== 'VIEWER' ? (
@@ -127,7 +135,7 @@ export default function AppShell({
                 data-tour="nav-new-record"
                 className={`${navLinkBase} text-gray-400 hover:bg-white/5 hover:text-white`}
               >
-                <span>✏️</span>
+                <FilePlus2 className="h-4 w-4" />
                 New Record
               </Link>
             ) : null}
@@ -138,7 +146,7 @@ export default function AppShell({
                 activeNav === 'org' ? 'bg-white/5 text-emerald-200' : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <span>🏢</span>
+              <Building2 className="h-4 w-4" />
               Organization
             </Link>
             {role === 'ADMIN' ? (
@@ -152,7 +160,7 @@ export default function AppShell({
                       : 'text-gray-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <span>🧩</span>
+                  <Shapes className="h-4 w-4" />
                   Entity Types
                 </Link>
                 <Link
@@ -164,7 +172,7 @@ export default function AppShell({
                       : 'text-gray-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <span>🧭</span>
+                  <GitBranch className="h-4 w-4" />
                   Workflows
                 </Link>
               </>

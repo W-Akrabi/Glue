@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/theme/theme-toggle";
 
 function getInitials(name?: string | null, email?: string | null) {
   const source = name?.trim() || email?.trim() || "";
@@ -70,7 +71,7 @@ export default function UserMenu({ name, email, role, avatarUrl }: UserMenuProps
 
       <div
         className={cn(
-          "absolute right-0 mt-2 w-64 rounded-xl border border-white/10 bg-[#141821] p-2 shadow-xl",
+          "absolute right-0 mt-2 w-64 rounded-xl border border-white/10 bg-card p-2 shadow-xl",
           open ? "block" : "hidden"
         )}
         role="menu"
@@ -82,6 +83,7 @@ export default function UserMenu({ name, email, role, avatarUrl }: UserMenuProps
           <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-gray-500">{role}</p>
         </div>
         <div className="mt-2 space-y-1">
+          <ThemeToggle label />
           <button
             type="button"
             className="w-full rounded-lg px-3 py-2 text-left text-sm text-gray-200 hover:bg-white/5"

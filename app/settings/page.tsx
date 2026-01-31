@@ -6,6 +6,7 @@ import AppShell from '@/components/layout/app-shell';
 import TourControls from '@/components/onboarding/tour-controls';
 import ProfileForm from '@/components/settings/profile-form';
 import PasswordForm from '@/components/settings/password-form';
+import ThemeToggle from '@/components/theme/theme-toggle';
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -73,6 +74,16 @@ export default async function SettingsPage() {
                 Restart the guided walkthrough anytime.
               </p>
               <TourControls />
+            </CardContent>
+          </Card>
+
+          <Card className="border-white/10 bg-neutral-900/70">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Appearance</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">Switch between light and dark.</p>
+              <ThemeToggle label />
             </CardContent>
           </Card>
         </div>

@@ -109,10 +109,10 @@ export default async function OrgSelectPage() {
               </div>
 
               {session.user.role === 'ADMIN' ? (
-                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">Invite code</p>
-                  <p className="mt-2 text-lg font-semibold text-emerald-100">{organization.inviteCode}</p>
-                  <p className="text-xs text-emerald-200/70 mt-1">
+                <div className="rounded-lg border border-primary/30 bg-primary/10 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Invite code</p>
+                  <p className="mt-2 text-lg font-semibold text-primary">{organization.inviteCode}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Share this code to add teammates to your org.
                   </p>
                 </div>
