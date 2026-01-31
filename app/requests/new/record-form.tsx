@@ -87,12 +87,12 @@ export default function RecordForm({ entityTypes }: RecordFormProps) {
         );
       })}
 
-      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4" data-tour="workflow-preview">
-        <p className="text-sm text-emerald-200 font-medium mb-2">Approval Workflow:</p>
+      <div className="rounded-lg border border-primary/30 bg-primary/10 p-4" data-tour="workflow-preview">
+        <p className="text-sm text-primary font-medium mb-2">Approval Workflow:</p>
         {steps.length === 0 ? (
-          <p className="text-sm text-emerald-200/80">No workflow steps configured.</p>
+          <p className="text-sm text-muted-foreground">No workflow steps configured.</p>
         ) : (
-          <ol className="text-sm text-emerald-200/80 space-y-1 ml-4 list-decimal">
+          <ol className="text-sm text-foreground/80 space-y-1 ml-4 list-decimal">
             {steps.map((step) => (
               <li key={step.step}>
                 Step {step.step}: {step.role} approval
