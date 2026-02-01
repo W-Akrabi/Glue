@@ -196,7 +196,7 @@ export default async function DashboardPage({
                               request.status,
                               assignedApproverNames.length > 0
                                 ? assignedApproverNames.join(', ')
-                                : steps.find((step: { step?: number; role?: string }) => step.step === currentStep)
+                                : (steps as Array<{ step?: number; role?: string }>).find((step) => step.step === currentStep)
                                     ?.role
                             )}
                           </span>
