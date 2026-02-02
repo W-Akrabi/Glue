@@ -100,7 +100,7 @@ export default function Home() {
           headline="Build the flow once. Use it everywhere."
           body="Map steps, set assignees, and add conditional rules so requests always reach the right people."
           linkText="See how it works"
-          imageSrc="/workflow_builder_ui.jpg"
+          imageSrc="/workflow_builder_ui.mp4"
           imagePosition="right"
         />
         <AssignmentSection />
@@ -256,10 +256,13 @@ function HeroSection() {
             custom={1}
             transition={splitTransition}
           >
-            <img
-              src="/workflow_builder_ui.jpg"
-              alt="Workflow Builder Interface"
+            <video
+              src="/workflow_builder_ui.mp4"
               className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
             />
             <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-[#4F6AFA] animate-pulse" />
           </motion.div>
@@ -280,6 +283,8 @@ function FeatureSection({
   note,
   id,
 }: FeatureSectionProps) {
+  const isVideo = imageSrc.endsWith(".mp4");
+
   return (
     <section
       id={id}
@@ -340,7 +345,22 @@ function FeatureSection({
             transition={splitTransition}
           >
             <div className="glue-card overflow-hidden bg-gradient-to-br from-white to-[#EEF1FA]">
-              <img src={imageSrc} alt={headline} className="w-full h-full object-cover" />
+              {isVideo ? (
+                <video
+                  src={imageSrc}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={imageSrc}
+                  alt={headline}
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
           </motion.div>
         </div>
