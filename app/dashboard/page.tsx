@@ -102,35 +102,35 @@ export default async function DashboardPage({
       search={{ name: 'q', value: query, placeholder: 'Search records, people, or entities' }}
     >
       <div className="mb-5 flex flex-wrap items-center gap-3" data-tour="dashboard-kpis">
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-gray-300">
+        <div className="flex items-center gap-2 rounded-full border border-[#E6E9F4] bg-white/80 px-4 py-2 text-xs text-[#1F2430] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
           <span className="h-2 w-2 rounded-full bg-amber-400" /> Pending {pendingCount}
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-gray-300">
+        <div className="flex items-center gap-2 rounded-full border border-[#E6E9F4] bg-white/80 px-4 py-2 text-xs text-[#1F2430] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
           <span className="h-2 w-2 rounded-full bg-emerald-400" /> Approved {approvedCount}
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-gray-300">
+        <div className="flex items-center gap-2 rounded-full border border-[#E6E9F4] bg-white/80 px-4 py-2 text-xs text-[#1F2430] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
           <span className="h-2 w-2 rounded-full bg-rose-400" /> Rejected {rejectedCount}
         </div>
-        <div className="ml-auto hidden items-center gap-2 text-xs text-gray-400 md:flex">
+        <div className="ml-auto hidden items-center gap-2 text-xs text-[#6B7280] md:flex">
           <span>Approval rate</span>
-          <span className="text-white">{approvalRate}%</span>
+          <span className="text-[#1F2430]">{approvalRate}%</span>
         </div>
       </div>
 
-      <Card className="border-white/10 bg-card" data-tour="dashboard-records">
+      <Card className="border-[#E6E9F4] bg-white/90" data-tour="dashboard-records">
         <CardContent className="p-0">
-          <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-[#E6E9F4] px-6 py-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Records</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-[#6B7280]">Records</p>
               <h2 className="text-xl font-semibold">
                 All records {query ? `(${filteredRecords.length})` : ''}
               </h2>
             </div>
-            <Link href="/requests" className="text-xs text-emerald-300 hover:text-emerald-200">
+            <Link href="/requests" className="text-xs text-[#4F6AFA] hover:text-[#445DF2]">
               Open full list
             </Link>
           </div>
-          <div className="divide-y divide-white/10">
+          <div className="divide-y divide-[#E6E9F4]">
             {filteredRecords.length === 0 ? (
               <div className="px-6 py-12 text-center text-muted-foreground">
                 No records yet.{' '}
@@ -165,12 +165,12 @@ export default async function DashboardPage({
                   <Link
                     key={request.id}
                     href={`/requests/${request.id}`}
-                    className="block px-6 py-4 hover:bg-white/5 transition"
+                    className="block px-6 py-4 hover:bg-[#F4F6FA] transition"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/10 text-xs">
+                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#EEF1FA] text-xs">
                             {request.entityType.name.slice(0, 1).toUpperCase()}
                           </span>
                           <h3 className="truncate font-medium">{title}</h3>

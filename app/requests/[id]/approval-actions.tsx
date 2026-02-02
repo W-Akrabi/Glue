@@ -30,7 +30,7 @@ export default function ApprovalActions({
   return (
     <Card
       data-testid="approval-actions"
-      className="border-white/10 bg-card/70"
+      className="border-[#E6E9F4] bg-white/90"
       data-tour="approval-actions"
     >
       <CardHeader>
@@ -48,7 +48,7 @@ export default function ApprovalActions({
           <textarea
             name="comment"
             disabled={approvePending}
-            className="min-h-[88px] w-full rounded-md border border-white/10 bg-card/60 px-3 py-2 text-sm text-white"
+            className="min-h-[88px] w-full rounded-md border border-[#E6E9F4] bg-white/90 px-3 py-2 text-sm text-white"
             placeholder="Add context for approval..."
           />
           {approveState?.error ? (
@@ -72,7 +72,7 @@ export default function ApprovalActions({
             name="comment"
             required
             disabled={rejectPending}
-            className="min-h-[88px] w-full rounded-md border border-white/10 bg-card/60 px-3 py-2 text-sm text-white"
+            className="min-h-[88px] w-full rounded-md border border-[#E6E9F4] bg-white/90 px-3 py-2 text-sm text-white"
             placeholder="Explain why you are rejecting..."
           />
           {rejectState?.error ? (

@@ -9,7 +9,7 @@ const STORAGE_KEY = "glue:theme";
 type Theme = "dark" | "light";
 
 function getPreferredTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
   if (stored === "dark" || stored === "light") return stored;
   return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
@@ -21,7 +21,7 @@ function applyTheme(theme: Theme) {
 }
 
 export default function ThemeToggle({ label = false }: { label?: boolean }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const initial = getPreferredTheme();
@@ -45,7 +45,7 @@ export default function ThemeToggle({ label = false }: { label?: boolean }) {
         {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         {label ? "Appearance" : null}
       </span>
-      {label ? <span className="text-xs text-gray-400">{theme}</span> : null}
+      {label ? <span className="text-xs text-[#8A94A7]">{theme}</span> : null}
     </Button>
   );
 }

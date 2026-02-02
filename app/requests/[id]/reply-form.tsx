@@ -23,7 +23,7 @@ export default function ReplyForm({ recordId, parentId }: ReplyFormProps) {
       <textarea
         name="body"
         disabled={pending}
-        className="min-h-[72px] w-full rounded-md border border-white/10 bg-card/50 px-3 py-2 text-sm text-white"
+        className="min-h-[72px] w-full rounded-md border border-[#E6E9F4] bg-card/50 px-3 py-2 text-sm text-white"
         placeholder="Reply..."
       />
       {state?.error ? <p className="text-xs text-destructive">{state.error}</p> : null}

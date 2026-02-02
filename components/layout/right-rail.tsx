@@ -70,41 +70,41 @@ export default async function RightRail({
 
   return (
     <div className="hidden w-80 shrink-0 flex-col gap-6 lg:flex">
-      <Card className="border-white/10 bg-card">
+      <Card className="border-[#E6E9F4] bg-white/90">
         <div className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Insights</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-[#6B7280]">Insights</p>
               <h3 className="text-lg font-semibold">Approval momentum</h3>
             </div>
-            <span className="text-xs text-primary">{approvalRate}%</span>
+            <span className="text-xs text-[#4F6AFA]">{approvalRate}%</span>
           </div>
-          <div className="space-y-3 text-xs text-gray-400">
+          <div className="space-y-3 text-xs text-[#6B7280]">
             <div className="flex items-center justify-between">
               <span>Pending approvals</span>
-              <span className="text-white">{pendingCount}</span>
+              <span className="text-[#1F2430]">{pendingCount}</span>
             </div>
             <div className="flex items-center justify-between">
               <span>Approved this period</span>
-              <span className="text-white">{approvedCount}</span>
+              <span className="text-[#1F2430]">{approvedCount}</span>
             </div>
             <div className="flex items-center justify-between">
               <span>Rejected</span>
-              <span className="text-white">{rejectedCount}</span>
+              <span className="text-[#1F2430]">{rejectedCount}</span>
             </div>
           </div>
-          <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-xs text-foreground">
+          <div className="rounded-xl border border-[#4F6AFA]/30 bg-[#4F6AFA]/10 px-4 py-3 text-xs text-[#1F2430]">
             Keep momentum high by clearing the approvals waiting on you.
           </div>
         </div>
       </Card>
 
-      <Card className="border-white/10 bg-card">
-        <div className="px-6 py-4 border-b border-white/10">
+      <Card className="border-[#E6E9F4] bg-white/90">
+        <div className="px-6 py-4 border-b border-[#E6E9F4]">
           <h2 className="text-lg font-semibold">Needs your approval</h2>
-          <p className="text-xs text-gray-500 mt-1">{actionable.length} items waiting on you</p>
+          <p className="text-xs text-[#6B7280] mt-1">{actionable.length} items waiting on you</p>
         </div>
-        <div className="divide-y divide-white/10">
+        <div className="divide-y divide-[#E6E9F4]">
           {actionable.length === 0 ? (
             <div className="px-6 py-10 text-sm text-muted-foreground">You are all caught up.</div>
           ) : (
@@ -116,14 +116,14 @@ export default async function RightRail({
                 <Link
                   key={record.id}
                   href={`/requests/${record.id}`}
-                  className="block px-6 py-4 hover:bg-white/5 transition"
+                  className="block px-6 py-4 hover:bg-[#F4F6FA] transition"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium">{title}</p>
                       <p className="text-xs text-muted-foreground mt-1">{record.entityType.name}</p>
                     </div>
-                    <span className="text-xs text-primary">Review</span>
+                    <span className="text-xs text-[#4F6AFA]">Review</span>
                   </div>
                 </Link>
               );
@@ -132,12 +132,12 @@ export default async function RightRail({
         </div>
       </Card>
 
-      <Card className="border-white/10 bg-card">
-        <div className="px-6 py-4 border-b border-white/10">
+      <Card className="border-[#E6E9F4] bg-white/90">
+        <div className="px-6 py-4 border-b border-[#E6E9F4]">
           <h2 className="text-lg font-semibold">Notifications</h2>
-          <p className="text-xs text-gray-500 mt-1">Latest SLA reminders</p>
+          <p className="text-xs text-[#6B7280] mt-1">Latest SLA reminders</p>
         </div>
-        <div className="divide-y divide-white/10">
+        <div className="divide-y divide-[#E6E9F4]">
           {notifications.length === 0 ? (
             <div className="px-6 py-10 text-sm text-muted-foreground">No new notifications.</div>
           ) : (
@@ -145,11 +145,11 @@ export default async function RightRail({
               <Link
                 key={notification.id}
                 href={notification.recordId ? `/requests/${notification.recordId}` : '/requests'}
-                className="block px-6 py-4 hover:bg-white/5 transition"
+                className="block px-6 py-4 hover:bg-[#F4F6FA] transition"
               >
                 <p className="text-sm font-medium">{notification.title}</p>
                 <p className="text-xs text-muted-foreground mt-1">{notification.body}</p>
-                <p className="text-[10px] text-gray-500 mt-2">
+                <p className="text-[10px] text-[#8A94A7] mt-2">
                   {new Date(notification.createdAt).toLocaleString()}
                 </p>
               </Link>

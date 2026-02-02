@@ -193,7 +193,7 @@ export default function WorkflowEditor({
         <Label htmlFor="entity-type">Entity type</Label>
         <select
           id="entity-type"
-          className="h-10 w-full rounded-md border border-white/10 bg-background px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="h-10 w-full rounded-xl border border-[#E6E9F4] bg-white/90 px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           value={entityTypeId}
           onChange={(event) => {
             const nextId = event.target.value;
@@ -234,7 +234,7 @@ export default function WorkflowEditor({
       {steps.map((step, index) => (
         <Card
           key={step.clientId}
-          className={`border-white/10 bg-card/40 transition ${
+          className={`border-[#E6E9F4] bg-white/80 transition ${
             draggingId === step.clientId ? "ring-2 ring-emerald-500/50" : ""
           }`}
           draggable
@@ -285,7 +285,7 @@ export default function WorkflowEditor({
               <Label htmlFor={`role-${step.clientId}`}>Required role</Label>
               <select
                 id={`role-${step.clientId}`}
-                className="h-10 w-full rounded-md border border-white/10 bg-background px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="h-10 w-full rounded-xl border border-[#E6E9F4] bg-white/90 px-3 py-2 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={step.role}
                 onChange={(event) => updateRole(step.clientId, event.target.value)}
                 {...(index === 0 ? { "data-tour": "workflow-role" } : {})}
@@ -313,7 +313,7 @@ export default function WorkflowEditor({
                     return (
                       <label
                         key={user.id}
-                      className="flex items-center gap-2 rounded-md border border-white/10 bg-card/30 px-3 py-2 text-xs text-gray-200"
+                      className="flex items-center gap-2 rounded-md border border-[#E6E9F4] bg-white/80 px-3 py-2 text-xs text-gray-200"
                     >
                       <input
                         type="checkbox"
@@ -342,7 +342,7 @@ export default function WorkflowEditor({
                 type="number"
                 min="1"
                 inputMode="numeric"
-                className="h-10 w-full rounded-md border border-white/10 bg-background px-3 text-sm text-white"
+                className="h-10 w-full rounded-xl border border-[#E6E9F4] bg-white/90 px-3 text-sm text-white"
                 placeholder="e.g. 48"
                 value={step.slaHours}
                 onChange={(event) => updateSlaHours(step.clientId, event.target.value)}
@@ -359,7 +359,7 @@ export default function WorkflowEditor({
                   return (
                     <label
                       key={user.id}
-                      className="flex items-center gap-2 rounded-md border border-white/10 bg-card/30 px-3 py-2 text-xs text-gray-200"
+                      className="flex items-center gap-2 rounded-md border border-[#E6E9F4] bg-white/80 px-3 py-2 text-xs text-gray-200"
                     >
                       <input
                         type="checkbox"

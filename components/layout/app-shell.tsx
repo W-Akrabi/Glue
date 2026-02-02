@@ -51,13 +51,13 @@ export default function AppShell({
   const organizationId = session.user.organizationId || '';
 
   return (
-    <div className="min-h-screen bg-background text-white">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-background/90 backdrop-blur">
+    <div className="min-h-screen bg-[#F4F6FA] text-[#1F2430] dot-grid">
+      <header className="sticky top-0 z-20 border-b border-[#E6E9F4] bg-white/80 backdrop-blur">
         <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-sky-400" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#4F6AFA] to-[#6B7CFF]" />
             <div>
-              <p className="text-sm text-gray-400">{headerSubtitle}</p>
+              <p className="text-sm text-[#6B7280]">{headerSubtitle}</p>
               <h1 className="text-lg font-semibold">{headerTitle}</h1>
             </div>
           </div>
@@ -71,9 +71,9 @@ export default function AppShell({
                   defaultValue={search.value}
                   placeholder={search.placeholder || 'Search'}
                   data-tour="header-search"
-                  className="h-10 w-full rounded-full border border-white/10 bg-card/40 pl-10 pr-4 text-sm text-white placeholder:text-gray-500"
+                  className="h-10 w-full rounded-full border border-[#E6E9F4] bg-white/90 pl-10 pr-4 text-sm text-[#1F2430] placeholder:text-[#8A94A7]"
                 />
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">⌕</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A94A7]">⌕</span>
               </form>
             </div>
           ) : (
@@ -85,7 +85,7 @@ export default function AppShell({
               <Button
                 asChild
                 size="sm"
-                className="bg-emerald-400 text-black hover:bg-emerald-300"
+                className="bg-gradient-to-r from-[#4F6AFA] to-[#6B7CFF] text-white hover:from-[#445DF2] hover:to-[#5F73FF] shadow-[0_10px_24px_rgba(79,106,250,0.25)]"
                 data-tour="header-create"
               >
                 <Link href={topAction.href}>{topAction.label}</Link>
@@ -102,16 +102,16 @@ export default function AppShell({
       </header>
 
       <div className="flex w-full gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <aside className="hidden w-56 shrink-0 flex-col gap-3 rounded-2xl border border-white/10 bg-card p-4 lg:flex">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Workspace</p>
+        <aside className="hidden w-56 shrink-0 flex-col gap-3 rounded-2xl border border-[#E6E9F4] bg-white/90 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.08)] lg:flex">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#6B7280]">Workspace</p>
           <nav className="space-y-1 text-sm">
             <Link
               href="/dashboard"
               data-tour="nav-dashboard"
               className={`${navLinkBase} ${
                 activeNav === 'dashboard'
-                  ? 'bg-white/5 text-emerald-200'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#EEF1FA] text-[#4F6AFA]'
+                  : 'text-[#6B7280] hover:bg-[#EEF1FA] hover:text-[#1F2430]'
               }`}
             >
               <LayoutDashboard className="h-4 w-4" />
@@ -122,8 +122,8 @@ export default function AppShell({
               data-tour="nav-records"
               className={`${navLinkBase} ${
                 activeNav === 'requests'
-                  ? 'bg-white/5 text-emerald-200'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-[#EEF1FA] text-[#4F6AFA]'
+                  : 'text-[#6B7280] hover:bg-[#EEF1FA] hover:text-[#1F2430]'
               }`}
             >
               <Files className="h-4 w-4" />
@@ -133,7 +133,7 @@ export default function AppShell({
               <Link
                 href="/requests/new"
                 data-tour="nav-new-record"
-                className={`${navLinkBase} text-gray-400 hover:bg-white/5 hover:text-white`}
+                className={`${navLinkBase} text-[#6B7280] hover:bg-[#EEF1FA] hover:text-[#1F2430]`}
               >
                 <FilePlus2 className="h-4 w-4" />
                 New Record
@@ -143,7 +143,9 @@ export default function AppShell({
               href="/org-select"
               data-tour="nav-org"
               className={`${navLinkBase} ${
-                activeNav === 'org' ? 'bg-white/5 text-emerald-200' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                activeNav === 'org'
+                  ? 'bg-[#EEF1FA] text-[#4F6AFA]'
+                  : 'text-[#6B7280] hover:bg-[#EEF1FA] hover:text-[#1F2430]'
               }`}
             >
               <Building2 className="h-4 w-4" />
@@ -156,8 +158,8 @@ export default function AppShell({
                   data-tour="nav-entity-types"
                   className={`${navLinkBase} ${
                     activeNav === 'admin-entity'
-                      ? 'bg-white/5 text-emerald-200'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-[#EEF1FA] text-[#4F6AFA]'
+                      : 'text-[#6B7280] hover:bg-[#EEF1FA] hover:text-[#1F2430]'
                   }`}
                 >
                   <Shapes className="h-4 w-4" />
@@ -168,8 +170,8 @@ export default function AppShell({
                   data-tour="nav-workflows"
                   className={`${navLinkBase} ${
                     activeNav === 'admin-workflows'
-                      ? 'bg-white/5 text-emerald-200'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-[#EEF1FA] text-[#4F6AFA]'
+                      : 'text-[#6B7280] hover:bg-[#EEF1FA] hover:text-[#1F2430]'
                   }`}
                 >
                   <GitBranch className="h-4 w-4" />
@@ -178,8 +180,8 @@ export default function AppShell({
               </>
             ) : null}
           </nav>
-          <div className="mt-4 rounded-xl border border-white/10 bg-card/40 p-3 text-xs text-gray-400">
-            <p className="font-semibold text-gray-300">Need help?</p>
+          <div className="mt-4 rounded-xl border border-[#E6E9F4] bg-[#F8F9FD] p-3 text-xs text-[#6B7280]">
+            <p className="font-semibold text-[#1F2430]">Need help?</p>
             <p className="mt-1">Define workflows and assign approvers to keep approvals moving.</p>
           </div>
         </aside>

@@ -199,8 +199,8 @@ export default async function RequestsPage({
             className={cn(
               'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'all'
-                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
-                : 'border-white/10 text-gray-400 hover:text-white'
+                ? 'border-[#4F6AFA] text-[#4F6AFA] bg-[#4F6AFA]/10'
+                : 'border-[#E6E9F4] text-[#6B7280] hover:text-[#1F2430]'
             )}
           >
             All ({counts.all})
@@ -210,8 +210,8 @@ export default async function RequestsPage({
             className={cn(
               'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'assigned'
-                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
-                : 'border-white/10 text-gray-400 hover:text-white'
+                ? 'border-[#4F6AFA] text-[#4F6AFA] bg-[#4F6AFA]/10'
+                : 'border-[#E6E9F4] text-[#6B7280] hover:text-[#1F2430]'
             )}
           >
             Needs my approval ({counts.assigned})
@@ -221,8 +221,8 @@ export default async function RequestsPage({
             className={cn(
               'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'created'
-                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
-                : 'border-white/10 text-gray-400 hover:text-white'
+                ? 'border-[#4F6AFA] text-[#4F6AFA] bg-[#4F6AFA]/10'
+                : 'border-[#E6E9F4] text-[#6B7280] hover:text-[#1F2430]'
             )}
           >
             Created by me ({counts.created})
@@ -232,8 +232,8 @@ export default async function RequestsPage({
             className={cn(
               'rounded-full border px-4 py-2 text-sm transition',
               viewFilter === 'related'
-                ? 'border-emerald-400 text-emerald-200 bg-emerald-400/10'
-                : 'border-white/10 text-gray-400 hover:text-white'
+                ? 'border-[#4F6AFA] text-[#4F6AFA] bg-[#4F6AFA]/10'
+                : 'border-[#E6E9F4] text-[#6B7280] hover:text-[#1F2430]'
             )}
           >
             Related to me ({counts.related})
@@ -245,12 +245,12 @@ export default async function RequestsPage({
             name="q"
             defaultValue={query}
             placeholder="Search titles, descriptions, people, entity types..."
-            className="h-10 min-w-[220px] flex-1 rounded-md border border-white/10 bg-background px-3 text-sm text-white"
+            className="h-10 min-w-[220px] flex-1 rounded-xl border border-[#E6E9F4] bg-white/90 px-3 text-sm text-[#1F2430]"
           />
           <select
             name="status"
             defaultValue={statusFilter}
-            className="h-10 rounded-md border border-white/10 bg-background px-3 text-sm text-white"
+            className="h-10 rounded-xl border border-[#E6E9F4] bg-white/90 px-3 text-sm text-[#1F2430]"
           >
             <option value="all">All statuses</option>
             {statusOptions.map((status) => (
@@ -262,7 +262,7 @@ export default async function RequestsPage({
           <select
             name="entityType"
             defaultValue={entityTypeFilter}
-            className="h-10 rounded-md border border-white/10 bg-background px-3 text-sm text-white"
+            className="h-10 rounded-xl border border-[#E6E9F4] bg-white/90 px-3 text-sm text-[#1F2430]"
           >
             <option value="all">All entity types</option>
             {entityTypes.map((type) => (
@@ -275,13 +275,13 @@ export default async function RequestsPage({
           <Button type="submit" variant="secondary">
             Apply
           </Button>
-          <Link href="/requests" className="text-sm text-gray-400 hover:text-white">
+          <Link href="/requests" className="text-sm text-[#6B7280] hover:text-[#1F2430]">
             Clear
           </Link>
         </form>
 
         <div
-          className="bg-card/70 border border-white/10 rounded-lg overflow-hidden"
+          className="bg-white/90 border border-[#E6E9F4] rounded-lg overflow-hidden"
           data-tour="requests-table"
         >
           {filteredRequests.length === 0 ? (

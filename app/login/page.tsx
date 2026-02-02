@@ -42,8 +42,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-white/10 bg-card/80">
+    <div className="min-h-screen flex items-center justify-center bg-[#F4F6FA] dot-grid px-4">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle>Welcome Back</CardTitle>
           <CardDescription>Sign in to access your workspace</CardDescription>

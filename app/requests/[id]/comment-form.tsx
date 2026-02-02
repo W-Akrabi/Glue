@@ -38,7 +38,7 @@ export default function CommentForm({ recordId }: CommentFormProps) {
       <textarea
         name="body"
         disabled={pending}
-        className="min-h-[96px] w-full rounded-md border border-white/10 bg-card/60 px-3 py-2 text-sm text-white"
+        className="min-h-[96px] w-full rounded-md border border-[#E6E9F4] bg-white/90 px-3 py-2 text-sm text-white"
         placeholder="Share context, questions, or decisions..."
       />
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

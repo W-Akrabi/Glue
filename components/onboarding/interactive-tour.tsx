@@ -524,7 +524,7 @@ export default function InteractiveTour({ role }: { role: string }) {
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-card/60" />
+      <div className="absolute inset-0 bg-white/90" />
       <div
         className="absolute rounded-xl border border-emerald-400/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.4)]"
         style={highlightStyle}
@@ -532,7 +532,7 @@ export default function InteractiveTour({ role }: { role: string }) {
       <div
         ref={tooltipRef}
         className={cn(
-          "absolute rounded-xl border border-white/10 bg-card p-4 text-white shadow-xl",
+          "absolute rounded-xl border border-[#E6E9F4] bg-card p-4 text-white shadow-xl",
           "backdrop-blur"
         )}
         style={tooltipStyle}

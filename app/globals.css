@@ -145,6 +145,34 @@
   :root[data-theme='light'] .text-white {
     color: hsl(var(--foreground)) !important;
   }
+
+  :root[data-theme='light'] .border-white\/10 {
+    border-color: rgba(15, 23, 42, 0.08) !important;
+  }
+
+  :root[data-theme='light'] .bg-white\/5 {
+    background-color: rgba(15, 23, 42, 0.03) !important;
+  }
+
+  :root[data-theme='light'] .bg-white\/10 {
+    background-color: rgba(15, 23, 42, 0.06) !important;
+  }
+
+  :root[data-theme='light'] .bg-card\/40 {
+    background-color: hsl(var(--card) / 0.7) !important;
+  }
+
+  :root[data-theme='light'] .bg-card\/60 {
+    background-color: hsl(var(--card) / 0.82) !important;
+  }
+
+  :root[data-theme='light'] .bg-card\/70 {
+    background-color: hsl(var(--card) / 0.9) !important;
+  }
+
+  :root[data-theme='light'] .bg-card\/80 {
+    background-color: hsl(var(--card) / 0.95) !important;
+  }
 }
 
 @layer components {
