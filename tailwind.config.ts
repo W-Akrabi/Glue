@@ -47,6 +47,14 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        glue: {
+          bg: "#F4F6FA",
+          dark: "#0B0D10",
+          accent: "#4F6AFA",
+          text: "#0B0D10",
+          "text-secondary": "#6B7280",
+          "text-muted-dark": "#A9B1C0",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

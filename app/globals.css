@@ -36,25 +36,26 @@
 }
 
 :root[data-theme='light'] {
-  --background: 0 0% 98%;
-  --foreground: 0 0% 8%;
+  --background: 228 33% 97%;
+  --foreground: 220 20% 6%;
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 8%;
+  --card-foreground: 220 20% 6%;
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 8%;
-  --primary: 158 84% 38%;
+  --popover-foreground: 220 20% 6%;
+  --primary: 228 95% 65%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 92%;
-  --secondary-foreground: 0 0% 12%;
-  --muted: 0 0% 94%;
-  --muted-foreground: 215 15% 35%;
-  --accent: 0 0% 90%;
-  --accent-foreground: 0 0% 12%;
-  --destructive: 0 72% 45%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 86%;
-  --input: 0 0% 86%;
-  --ring: 158 84% 38%;
+  --secondary: 228 33% 97%;
+  --secondary-foreground: 220 20% 6%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+  --accent: 228 95% 65%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 228 95% 65%;
+  --radius: 2.25rem;
   --status-draft-fg: 210 10% 20%;
   --status-draft-bg: 210 12% 92%;
   --status-draft-border: 210 10% 80%;
@@ -203,5 +204,130 @@
       hsl(220 90% 56% / 0.15),
       transparent
     );
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display, "Space Grotesk"), system-ui, sans-serif;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono, "IBM Plex Mono"), ui-monospace, SFMono-Regular,
+      monospace;
+  }
+}
+
+@layer components {
+  .glue-card {
+    @apply bg-white rounded-[36px] border border-[rgba(11,13,16,0.08)];
+    box-shadow: 0 18px 60px rgba(11, 13, 16, 0.1);
+  }
+
+  .glue-card-dark {
+    @apply bg-[#0B0D10] rounded-[36px] border border-[rgba(244,246,250,0.08)];
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@layer utilities {
+  .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      rgba(11, 13, 16, 0.14) 1.2px,
+      transparent 1.2px
+    );
+    background-size: 26px 26px;
+  }
+
+  .dot-grid-dark {
+    background-image: radial-gradient(
+      circle,
+      rgba(244, 246, 250, 0.1) 1.2px,
+      transparent 1.2px
+    );
+    background-size: 26px 26px;
+  }
+
+  .grain-overlay::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  .section-pinned {
+    @apply w-screen h-screen relative overflow-hidden;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono, "IBM Plex Mono"), ui-monospace, SFMono-Regular,
+      monospace;
+    @apply text-xs uppercase tracking-[0.12em] text-[#6B7280];
+  }
+
+  .headline-display {
+    font-family: var(--font-display, "Space Grotesk"), system-ui, sans-serif;
+    @apply font-bold leading-[0.95] tracking-[-0.02em];
+    font-size: clamp(2rem, 4vw, 3.8rem);
+  }
+
+  .headline-outline {
+    -webkit-text-stroke: 2px rgba(244, 246, 250, 0.9);
+    color: transparent;
+  }
+
+  .link-underline {
+    @apply relative inline-block;
+  }
+
+  .link-underline::after {
+    content: "";
+    @apply absolute bottom-0 left-0 w-full h-[1px] bg-[#4F6AFA] origin-left scale-x-0 transition-transform duration-300;
+  }
+
+  .link-underline:hover::after {
+    @apply scale-x-100;
+  }
+
+  .btn-hover {
+    @apply transition-transform duration-200;
+  }
+
+  .btn-hover:hover {
+    @apply -translate-y-0.5 scale-[1.02];
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f6fa;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(11, 13, 16, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 13, 16, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
