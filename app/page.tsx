@@ -71,6 +71,7 @@ interface FeatureSectionProps {
   showLogos?: boolean;
   note?: string;
   id?: string;
+  renderVisual?: React.ReactNode;
 }
 
 export default function Home() {
@@ -102,6 +103,7 @@ export default function Home() {
           linkText="See how it works"
           imageSrc="/workflow_builder_ui.mp4"
           imagePosition="right"
+          renderVisual={<WorkflowBuilderVisual />}
         />
         <AssignmentSection />
         <SLASection />
@@ -282,6 +284,7 @@ function FeatureSection({
   showLogos,
   note,
   id,
+  renderVisual,
 }: FeatureSectionProps) {
   const isVideo = imageSrc.endsWith(".mp4");
 
@@ -345,7 +348,9 @@ function FeatureSection({
             transition={splitTransition}
           >
             <div className="glue-card overflow-hidden bg-gradient-to-br from-white to-[#EEF1FA]">
-              {isVideo ? (
+              {renderVisual ? (
+                renderVisual
+              ) : isVideo ? (
                 <video
                   src={imageSrc}
                   className="w-full h-full object-cover"
@@ -366,6 +371,89 @@ function FeatureSection({
         </div>
       </div>
     </section>
+  );
+}
+
+function WorkflowBuilderVisual() {
+  return (
+    <div className="relative h-full min-h-[360px] w-full p-6">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(79,106,250,0.12),transparent_60%)]" />
+      <div className="relative z-10 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#6B7280]">
+            Workflow Template
+          </div>
+          <span className="rounded-full bg-[#4F6AFA]/10 px-3 py-1 text-xs font-semibold text-[#4F6AFA]">
+            Active
+          </span>
+        </div>
+
+        <div className="rounded-3xl border border-[#E3E6F3] bg-white/90 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <div className="flex items-center gap-3">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#4F6AFA]" />
+            <p className="text-sm font-semibold text-[#1F2430]">
+              New vendor request
+            </p>
+            <span className="ml-auto text-xs text-[#6B7280]">SLA 24h</span>
+          </div>
+          <div className="mt-4 flex items-center justify-between gap-3 text-xs text-[#6B7280]">
+            <span className="rounded-full bg-[#F4F6FA] px-3 py-1">
+              Intake
+            </span>
+            <span className="rounded-full bg-[#F4F6FA] px-3 py-1">
+              Finance review
+            </span>
+            <span className="rounded-full bg-[#F4F6FA] px-3 py-1">
+              Legal signoff
+            </span>
+            <span className="rounded-full bg-[#F4F6FA] px-3 py-1">
+              Approve
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-[#E3E6F3] bg-white/90 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
+              Routing
+            </p>
+            <p className="mt-2 text-sm font-semibold text-[#1F2430]">
+              If spend &gt; $25K → CFO approval
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="rounded-full bg-[#4F6AFA]/10 px-2.5 py-1 text-xs font-semibold text-[#4F6AFA]">
+                Conditional
+              </span>
+              <span className="rounded-full bg-[#22C55E]/10 px-2.5 py-1 text-xs font-semibold text-[#22C55E]">
+                Auto-assign
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[#E3E6F3] bg-white/90 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
+              Approvers
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              {["JD", "AM", "SK"].map((person) => (
+                <span
+                  key={person}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#4F6AFA]/15 text-xs font-semibold text-[#4F6AFA]"
+                >
+                  {person}
+                </span>
+              ))}
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F4F6FA] text-xs font-semibold text-[#6B7280]">
+                +2
+              </span>
+            </div>
+            <p className="mt-3 text-xs text-[#6B7280]">
+              Backup approver on escalation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
