@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import WorkflowEditor from './workflow-editor';
 import SlaRunner from './sla-runner';
 import AppShell from '@/components/layout/app-shell';
+import AssignmentPreview from './assignment-preview';
 
 export default async function AdminWorkflowsPage() {
   const session = await auth();
@@ -25,7 +26,7 @@ export default async function AdminWorkflowsPage() {
 
   const orgUsers = await prisma.user.findMany({
     where: { organizationId: session.user.organizationId! },
-    select: { id: true, name: true, email: true, role: true },
+    select: { id: true, name: true, email: true, role: true, avatarUrl: true },
     orderBy: { name: 'asc' },
   });
 

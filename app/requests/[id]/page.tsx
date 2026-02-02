@@ -338,23 +338,96 @@ export default async function RequestDetailPage({
         <div className="space-y-6">
           <Card className="border-[#E6E9F4] bg-white/90">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Record metadata</CardTitle>
+              <CardTitle className="text-lg font-semibold">Workflow template</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div>
-                <p className="text-xs text-muted-foreground">Organization</p>
-                <p>{request.organization.name}</p>
+            <CardContent className="space-y-5 text-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#6B7280]">
+                  Workflow
+                </div>
+                <span className="rounded-full bg-[#4F6AFA]/10 px-3 py-1 text-xs font-semibold text-[#4F6AFA]">
+                  Active
+                </span>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Current step</p>
-                <p>
-                  Step {request.workflowInstance?.currentStep ?? 0} of{' '}
-                  {request.workflowInstance?.steps.length ?? 0}
-                </p>
+
+              <div className="rounded-3xl border border-[#E3E6F3] bg-white/95 p-4 shadow-[0_14px_34px_rgba(15,23,42,0.08)]">
+                <div className="flex items-center gap-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#4F6AFA]" />
+                  <p className="text-sm font-semibold text-[#1F2430]">{title}</p>
+                  <span className="ml-auto text-xs text-[#6B7280]">
+                    {currentStep?.slaHours ? `SLA ${currentStep.slaHours}h` : 'SLA 24h'}
+                  </span>
+                </div>
+                <div className="mt-4 grid gap-2 text-xs text-[#6B7280] sm:grid-cols-4">
+                  {workflowSteps.length > 0 ? (
+                    workflowSteps.map((step) => (
+                      <span
+                        key={`step-${step.step}`}
+                        className="rounded-full bg-[#F4F6FA] px-3 py-1 text-center"
+                      >
+                        {step.role.replace(/_/g, ' ').toLowerCase()}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="rounded-full bg-[#F4F6FA] px-3 py-1 text-center">
+                      Intake
+                    </span>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Approvers</p>
-                <p>{currentApproverNames.length > 0 ? currentApproverNames.join(', ') : 'Unassigned'}</p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-[#E3E6F3] bg-white/95 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.07)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
+                    Routing
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-[#1F2430]">
+                    {requiredRole ? `Route to ${requiredRole.toLowerCase()} approvals` : 'Route by role'}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="rounded-full bg-[#4F6AFA]/10 px-2.5 py-1 text-xs font-semibold text-[#4F6AFA]">
+                      Conditional
+                    </span>
+                    <span className="rounded-full bg-[#22C55E]/10 px-2.5 py-1 text-xs font-semibold text-[#22C55E]">
+                      Auto-assign
+                    </span>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[#E3E6F3] bg-white/95 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.07)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
+                    Approvers
+                  </p>
+                  <div className="mt-3 flex items-center gap-2">
+                    {currentApproverNames.length > 0 ? (
+                      currentApproverNames.slice(0, 3).map((name) => (
+                        <span
+                          key={name}
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF1FA] text-[11px] font-semibold text-[#4F6AFA]"
+                        >
+                          {name
+                            .split(' ')
+                            .map((part) => part[0])
+                            .slice(0, 2)
+                            .join('')
+                            .toUpperCase()}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="rounded-full bg-[#F4F6FA] px-3 py-1 text-xs text-[#6B7280]">
+                        Unassigned
+                      </span>
+                    )}
+                    {currentApproverNames.length > 3 ? (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F4F6FA] text-xs font-semibold text-[#6B7280]">
+                        +{currentApproverNames.length - 3}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-3 text-xs text-[#6B7280]">
+                    Backup approver on escalation.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
