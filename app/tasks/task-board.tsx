@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,7 +17,6 @@ import {
   Circle,
   Loader2,
   Link2,
-  ChevronDown,
 } from 'lucide-react';
 
 type SerializedTask = {
@@ -72,6 +71,7 @@ const TYPE_LABELS: Record<string, string> = {
   FOLLOW_UP: 'Follow-up',
   OTHER: 'Other',
 };
+type TaskStatus = (typeof STATUS_COLUMNS)[number];
 
 function AISuggestionsPanel({ currentUserId, organizationId, userRole }: { currentUserId: string; organizationId: string; userRole: string }) {
   const [suggestions, setSuggestions] = useState<{
@@ -310,65 +310,135 @@ function AISuggestionsPanel({ currentUserId, organizationId, userRole }: { curre
   );
 }
 
-function TaskCard({ task }: { task: SerializedTask }) {
-  const [isPending, startTransition] = useTransition();
+function TaskCard({
+  task,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: {
+  task: SerializedTask;
+  onDragStart: (taskId: string) => void;
+  onDragEnd: () => void;
+  isDragging: boolean;
+}) {
   const priorityConf = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
 
   return (
-    <Link href={`/tasks/${task.id}`} data-testid={`task-card-${task.id}`}>
-      <div className="bg-white rounded-2xl border border-[#E6E9F4] p-4 hover:shadow-md transition cursor-pointer group">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h4 className="text-sm font-medium text-[#1F2430] line-clamp-2 group-hover:text-[#4F6AFA] transition">
-            {task.title}
-          </h4>
-          <Badge className={`shrink-0 text-[10px] border ${priorityConf.color}`}>{priorityConf.label}</Badge>
-        </div>
-
-        {task.description && (
-          <p className="text-xs text-[#6B7280] line-clamp-2 mb-3">{task.description}</p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#8A94A7]">
-          <span className="rounded-full bg-[#F4F6FA] px-2 py-0.5">{TYPE_LABELS[task.type] || task.type}</span>
-          {task.assignee && (
-            <span className="flex items-center gap-1">
-              <User className="h-3 w-3" /> {task.assignee.name || task.assignee.email}
-            </span>
-          )}
-          {task.dueAt && (
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" /> {new Date(task.dueAt).toLocaleDateString()}
-            </span>
-          )}
-          {task.estimateHours && (
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" /> {task.estimateHours}h
-            </span>
-          )}
-          {task.record && (
-            <span className="flex items-center gap-1 text-[#4F6AFA]">
-              <Link2 className="h-3 w-3" /> {task.record.entityType}
-            </span>
-          )}
-        </div>
-
-        {task.subtasks.length > 0 && (
-          <div className="mt-2 text-[11px] text-[#8A94A7]">
-            {task.subtasks.filter((s) => s.status === 'DONE').length}/{task.subtasks.length} subtasks done
+    <div
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', task.id);
+        onDragStart(task.id);
+      }}
+      onDragEnd={onDragEnd}
+      className={isDragging ? 'opacity-60' : ''}
+      data-testid={`task-draggable-${task.id}`}
+    >
+      <Link href={`/tasks/${task.id}`} data-testid={`task-card-${task.id}`}>
+        <div className="bg-white rounded-2xl border border-[#E6E9F4] p-4 hover:shadow-md transition cursor-pointer group">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h4 className="text-sm font-medium text-[#1F2430] line-clamp-2 group-hover:text-[#4F6AFA] transition">
+              {task.title}
+            </h4>
+            <Badge className={`shrink-0 text-[10px] border ${priorityConf.color}`}>
+              {priorityConf.label}
+            </Badge>
           </div>
-        )}
 
-        {task.blockedBy.length > 0 && (
-          <div className="mt-2 flex items-center gap-1 text-[11px] text-rose-500">
-            <AlertTriangle className="h-3 w-3" /> Blocked by {task.blockedBy.length} task(s)
+          {task.description && (
+            <p className="text-xs text-[#6B7280] line-clamp-2 mb-3">{task.description}</p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#8A94A7]">
+            <span className="rounded-full bg-[#F4F6FA] px-2 py-0.5">
+              {TYPE_LABELS[task.type] || task.type}
+            </span>
+            {task.assignee && (
+              <span className="flex items-center gap-1">
+                <User className="h-3 w-3" /> {task.assignee.name || task.assignee.email}
+              </span>
+            )}
+            {task.dueAt && (
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" /> {new Date(task.dueAt).toLocaleDateString()}
+              </span>
+            )}
+            {task.estimateHours && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" /> {task.estimateHours}h
+              </span>
+            )}
+            {task.record && (
+              <span className="flex items-center gap-1 text-[#4F6AFA]">
+                <Link2 className="h-3 w-3" /> {task.record.entityType}
+              </span>
+            )}
           </div>
-        )}
-      </div>
-    </Link>
+
+          {task.subtasks.length > 0 && (
+            <div className="mt-2 text-[11px] text-[#8A94A7]">
+              {task.subtasks.filter((s) => s.status === 'DONE').length}/{task.subtasks.length}{' '}
+              subtasks done
+            </div>
+          )}
+
+          {task.blockedBy.length > 0 && (
+            <div className="mt-2 flex items-center gap-1 text-[11px] text-rose-500">
+              <AlertTriangle className="h-3 w-3" /> Blocked by {task.blockedBy.length} task(s)
+            </div>
+          )}
+        </div>
+      </Link>
+    </div>
   );
 }
 
-export default function TaskBoard({ tasks, users, viewMode, currentUserId, organizationId, userRole }: Props) {
+export default function TaskBoard({
+  tasks,
+  users: _users,
+  viewMode,
+  currentUserId,
+  organizationId,
+  userRole,
+}: Props) {
+  void _users;
+  const [boardTasks, setBoardTasks] = useState(tasks);
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [activeDropStatus, setActiveDropStatus] = useState<TaskStatus | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [isUpdatingStatus, startTransition] = useTransition();
+
+  useEffect(() => {
+    setBoardTasks(tasks);
+  }, [tasks]);
+
+  const handleDropToStatus = (targetStatus: TaskStatus, taskIdFromDrop?: string) => {
+    const taskId = taskIdFromDrop || draggedTaskId;
+    setActiveDropStatus(null);
+    setDraggedTaskId(null);
+    if (!taskId) return;
+
+    const previousTasks = boardTasks;
+    const movedTask = previousTasks.find((task) => task.id === taskId);
+    if (!movedTask || movedTask.status === targetStatus) {
+      return;
+    }
+
+    setStatusError(null);
+    setBoardTasks((current) =>
+      current.map((task) => (task.id === taskId ? { ...task, status: targetStatus } : task))
+    );
+
+    startTransition(async () => {
+      const result = await updateTaskStatus(taskId, targetStatus);
+      if (result?.error) {
+        setBoardTasks(previousTasks);
+        setStatusError(result.error);
+      }
+    });
+  };
+
   if (viewMode === 'board') {
     return (
       <div>
@@ -377,10 +447,18 @@ export default function TaskBoard({ tasks, users, viewMode, currentUserId, organ
           organizationId={organizationId}
           userRole={userRole}
         />
+        {statusError && (
+          <p className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+            {statusError}
+          </p>
+        )}
+        {isUpdatingStatus && (
+          <p className="mb-3 text-xs text-[#6B7280]">Saving task status...</p>
+        )}
         <div className="grid grid-cols-5 gap-4" data-testid="task-board">
           {STATUS_COLUMNS.map((status) => {
             const conf = STATUS_CONFIG[status];
-            const columnTasks = tasks.filter((t) => t.status === status);
+            const columnTasks = boardTasks.filter((t) => t.status === status);
             return (
               <div key={status} className="space-y-3" data-testid={`column-${status}`}>
                 <div className="flex items-center gap-2 px-1">
@@ -390,9 +468,39 @@ export default function TaskBoard({ tasks, users, viewMode, currentUserId, organ
                     {columnTasks.length}
                   </span>
                 </div>
-                <div className="space-y-3 min-h-[200px]">
+                <div
+                  className={`space-y-3 min-h-[200px] rounded-2xl p-2 transition ${
+                    activeDropStatus === status
+                      ? 'border border-dashed border-[#4F6AFA]/40 bg-[#4F6AFA]/5'
+                      : ''
+                  }`}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    if (draggedTaskId) {
+                      setActiveDropStatus(status);
+                    }
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const taskId = event.dataTransfer.getData('text/plain');
+                    handleDropToStatus(status, taskId || undefined);
+                  }}
+                >
                   {columnTasks.map((task) => (
-                    <TaskCard key={task.id} task={task} />
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onDragStart={(taskId) => {
+                        setDraggedTaskId(taskId);
+                        setStatusError(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedTaskId(null);
+                        setActiveDropStatus(null);
+                      }}
+                      isDragging={draggedTaskId === task.id}
+                    />
                   ))}
                   {columnTasks.length === 0 && (
                     <div className="rounded-2xl border border-dashed border-[#E6E9F4] p-6 text-center text-xs text-[#8A94A7]">
@@ -430,7 +538,7 @@ export default function TaskBoard({ tasks, users, viewMode, currentUserId, organ
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E6E9F4]">
-            {tasks.map((task) => {
+            {boardTasks.map((task) => {
               const statusConf = STATUS_CONFIG[task.status] || STATUS_CONFIG.BACKLOG;
               const priorityConf = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
               return (
@@ -470,7 +578,7 @@ export default function TaskBoard({ tasks, users, viewMode, currentUserId, organ
                 </tr>
               );
             })}
-            {tasks.length === 0 && (
+            {boardTasks.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center text-[#8A94A7]">
                   No tasks yet.{' '}

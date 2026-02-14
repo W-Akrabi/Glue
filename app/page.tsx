@@ -163,9 +163,9 @@ function Navigation() {
             </div>
 
             <div className="hidden lg:block">
-              <Button className="bg-gradient-to-r from-[#4F6AFA] to-[#6B7CFF] hover:from-[#445DF2] hover:to-[#5F73FF] text-white font-medium px-5 py-2.5 rounded-full btn-hover shadow-[0_10px_30px_rgba(79,106,250,0.25)]">
-                Request demo
-              </Button>
+              <a href="/login" className="bg-gradient-to-r from-[#4F6AFA] to-[#6B7CFF] hover:from-[#445DF2] hover:to-[#5F73FF] text-white font-medium px-5 py-2.5 rounded-full btn-hover shadow-[0_10px_30px_rgba(79,106,250,0.25)] inline-block">
+                signup/login
+              </a>
             </div>
 
             <button
