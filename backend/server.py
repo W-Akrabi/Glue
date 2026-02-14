@@ -4,12 +4,14 @@ import uuid
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 import psycopg2
 import psycopg2.extras
+import httpx
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
@@ -25,6 +27,7 @@ app.add_middleware(
 
 EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
+NEXTJS_URL = "http://localhost:3000"
 
 
 def get_db():
@@ -46,24 +49,60 @@ def health():
     return {"status": "ok"}
 
 
+# Proxy all /api/auth/* requests to Next.js server
+@app.api_route("/api/auth/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def proxy_auth(request: Request, path: str):
+    target_url = f"{NEXTJS_URL}/api/auth/{path}"
+    query = str(request.url.query)
+    if query:
+        target_url += f"?{query}"
+
+    headers = dict(request.headers)
+    headers.pop("host", None)
+    headers.pop("content-length", None)
+
+    body = await request.body()
+
+    async with httpx.AsyncClient(follow_redirects=False, timeout=30.0) as client:
+        resp = await client.request(
+            method=request.method,
+            url=target_url,
+            headers=headers,
+            content=body,
+        )
+
+    excluded_headers = {"transfer-encoding", "content-encoding", "content-length"}
+    response_headers = {
+        k: v for k, v in resp.headers.items()
+        if k.lower() not in excluded_headers
+    }
+
+    return StreamingResponse(
+        iter([resp.content]),
+        status_code=resp.status_code,
+        headers=response_headers,
+        media_type=resp.headers.get("content-type"),
+    )
+
+
 @app.post("/api/ai/task-suggestions")
 async def task_suggestions(req: AISuggestRequest):
     try:
         conn = get_db()
         cur = conn.cursor()
 
-        # Get user info
-        cur.execute("SELECT id, name, email, role FROM users WHERE id = %s", (req.userId,))
+        # Get user info (Prisma uses camelCase column names)
+        cur.execute('SELECT id, name, email, role FROM users WHERE id = %s', (req.userId,))
         user = cur.fetchone()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         # Get user's current tasks
-        cur.execute("""
-            SELECT t.id, t.title, t.description, t.status, t.type, t.priority, t.due_at,
-                   t.estimate_hours, t.record_id
+        cur.execute('''
+            SELECT t.id, t.title, t.description, t.status, t.type, t.priority, t."dueAt",
+                   t."estimateHours", t."recordId"
             FROM tasks t
-            WHERE t.assignee_id = %s AND t.organization_id = %s
+            WHERE t."assigneeId" = %s AND t."organizationId" = %s
             AND t.status NOT IN ('DONE')
             ORDER BY
                 CASE t.priority
@@ -72,35 +111,35 @@ async def task_suggestions(req: AISuggestRequest):
                     WHEN 'MEDIUM' THEN 3
                     WHEN 'LOW' THEN 4
                 END,
-                t.due_at ASC NULLS LAST
+                t."dueAt" ASC NULLS LAST
             LIMIT 20
-        """, (req.userId, req.organizationId))
+        ''', (req.userId, req.organizationId))
         tasks = cur.fetchall()
 
         # Get tasks that are blocking user's tasks
-        cur.execute("""
-            SELECT td.blocked_task_id, bt.title as blocking_title, bt.status as blocking_status
+        cur.execute('''
+            SELECT td."blockedTaskId", bt.title as blocking_title, bt.status as blocking_status
             FROM task_dependencies td
-            JOIN tasks bt ON bt.id = td.blocking_task_id
-            JOIN tasks t ON t.id = td.blocked_task_id
-            WHERE t.assignee_id = %s AND bt.status != 'DONE'
-        """, (req.userId,))
+            JOIN tasks bt ON bt.id = td."blockingTaskId"
+            JOIN tasks t ON t.id = td."blockedTaskId"
+            WHERE t."assigneeId" = %s AND bt.status != 'DONE'
+        ''', (req.userId,))
         blockers = cur.fetchall()
 
         # Get pending approvals for user
-        cur.execute("""
+        cur.execute('''
             SELECT r.id, r.data, r.status, et.name as entity_type
             FROM records r
-            JOIN entity_types et ON et.id = r.entity_type_id
-            JOIN workflow_instances wi ON wi.record_id = r.id
-            JOIN workflow_step_instances wsi ON wsi.workflow_instance_id = wi.id
-                AND wsi.step_number = wi.current_step
-            WHERE r.organization_id = %s
+            JOIN entity_types et ON et.id = r."entityTypeId"
+            JOIN workflow_instances wi ON wi."recordId" = r.id
+            JOIN workflow_step_instances wsi ON wsi."workflowInstanceId" = wi.id
+                AND wsi."stepNumber" = wi."currentStep"
+            WHERE r."organizationId" = %s
                 AND r.status = 'PENDING_APPROVAL'
                 AND wsi.status = 'PENDING'
-                AND wsi.assigned_approver_ids::jsonb ? %s
+                AND wsi."assignedApproverIds"::jsonb ? %s
             LIMIT 10
-        """, (req.organizationId, req.userId))
+        ''', (req.organizationId, req.userId))
         pending_approvals = cur.fetchall()
 
         conn.close()
@@ -113,8 +152,8 @@ async def task_suggestions(req: AISuggestRequest):
                 "status": str(t["status"]),
                 "type": str(t["type"]),
                 "priority": str(t["priority"]),
-                "due": str(t["due_at"]) if t["due_at"] else "No deadline",
-                "estimate": f"{t['estimate_hours']}h" if t["estimate_hours"] else "Unestimated"
+                "due": str(t["dueAt"]) if t["dueAt"] else "No deadline",
+                "estimate": f"{t['estimateHours']}h" if t["estimateHours"] else "Unestimated"
             })
 
         blocker_context = []
@@ -179,7 +218,6 @@ Respond ONLY with valid JSON, no markdown.
         try:
             result = json.loads(response)
         except json.JSONDecodeError:
-            # Try to extract JSON from response
             start = response.find("{")
             end = response.rfind("}") + 1
             if start >= 0 and end > start:
@@ -208,32 +246,32 @@ async def assignment_recommendations(req: AIAssignRequest):
         cur = conn.cursor()
 
         # Get all org users
-        cur.execute("""
+        cur.execute('''
             SELECT id, name, email, role FROM users
-            WHERE organization_id = %s
+            WHERE "organizationId" = %s
             ORDER BY name
-        """, (req.organizationId,))
+        ''', (req.organizationId,))
         users = cur.fetchall()
 
         # Get task counts per user
-        cur.execute("""
-            SELECT assignee_id,
+        cur.execute('''
+            SELECT "assigneeId",
                    COUNT(*) FILTER (WHERE status NOT IN ('DONE')) as active_tasks,
                    COUNT(*) FILTER (WHERE status = 'IN_PROGRESS') as in_progress,
                    COUNT(*) FILTER (WHERE status = 'BLOCKED') as blocked,
                    COUNT(*) FILTER (WHERE priority = 'URGENT' AND status NOT IN ('DONE')) as urgent_tasks,
                    COUNT(*) FILTER (WHERE status = 'DONE') as completed_tasks
             FROM tasks
-            WHERE organization_id = %s AND assignee_id IS NOT NULL
-            GROUP BY assignee_id
-        """, (req.organizationId,))
-        workload = {row["assignee_id"]: dict(row) for row in cur.fetchall()}
+            WHERE "organizationId" = %s AND "assigneeId" IS NOT NULL
+            GROUP BY "assigneeId"
+        ''', (req.organizationId,))
+        workload = {row["assigneeId"]: dict(row) for row in cur.fetchall()}
 
         # Get unassigned tasks
-        cur.execute("""
-            SELECT id, title, description, type, priority, due_at, estimate_hours, record_id
+        cur.execute('''
+            SELECT id, title, description, type, priority, "dueAt", "estimateHours", "recordId"
             FROM tasks
-            WHERE organization_id = %s AND assignee_id IS NULL AND status NOT IN ('DONE')
+            WHERE "organizationId" = %s AND "assigneeId" IS NULL AND status NOT IN ('DONE')
             ORDER BY
                 CASE priority
                     WHEN 'URGENT' THEN 1
@@ -241,18 +279,18 @@ async def assignment_recommendations(req: AIAssignRequest):
                     WHEN 'MEDIUM' THEN 3
                     WHEN 'LOW' THEN 4
                 END,
-                due_at ASC NULLS LAST
+                "dueAt" ASC NULLS LAST
             LIMIT 15
-        """, (req.organizationId,))
+        ''', (req.organizationId,))
         unassigned = cur.fetchall()
 
         # If a specific task was requested, get its details
         target_task = None
         if req.taskId:
-            cur.execute("""
-                SELECT id, title, description, type, priority, due_at, estimate_hours, record_id
+            cur.execute('''
+                SELECT id, title, description, type, priority, "dueAt", "estimateHours", "recordId"
                 FROM tasks WHERE id = %s
-            """, (req.taskId,))
+            ''', (req.taskId,))
             target_task = cur.fetchone()
 
         conn.close()
@@ -278,9 +316,9 @@ async def assignment_recommendations(req: AIAssignRequest):
                 "title": t["title"],
                 "type": str(t["type"]),
                 "priority": str(t["priority"]),
-                "due": str(t["due_at"]) if t["due_at"] else "No deadline",
-                "estimate": f"{t['estimate_hours']}h" if t["estimate_hours"] else "Unestimated",
-                "linked_to_approval": bool(t["record_id"])
+                "due": str(t["dueAt"]) if t["dueAt"] else "No deadline",
+                "estimate": f"{t['estimateHours']}h" if t["estimateHours"] else "Unestimated",
+                "linked_to_approval": bool(t["recordId"])
             })
 
         target_context = None
