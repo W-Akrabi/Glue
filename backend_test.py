@@ -93,7 +93,7 @@ class TaskManagementAPITester:
     def test_ai_assignment_recommendations(self) -> bool:
         """Test AI assignment recommendations endpoint"""
         test_payload = {
-            "organizationId": "test-org-id"
+            "organizationId": "cmlllcxgi0000tf6l28970nrz"
         }
         
         try:
