@@ -138,7 +138,7 @@ class TaskManagementAPITester:
     def test_ai_endpoints_with_optional_task_id(self) -> bool:
         """Test AI assignment recommendations with optional taskId"""
         test_payload = {
-            "organizationId": "test-org-id",
+            "organizationId": "cmlllcxgi0000tf6l28970nrz",
             "taskId": "test-task-id"
         }
         
