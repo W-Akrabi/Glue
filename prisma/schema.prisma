@@ -26,6 +26,8 @@ model User {
   auditLogs     AuditLog[]
   notifications Notification[]
   comments      Comment[]
+  assignedTasks Task[]         @relation("TaskAssignee")
+  createdTasks  Task[]         @relation("TaskCreator")
 
   @@map("users")
 }
@@ -44,6 +46,7 @@ model Organization {
   users     User[]
   entityTypes EntityType[]
   records  Record[]
+  tasks    Task[]
 
   @@map("organizations")
 }
@@ -77,6 +80,7 @@ model Record {
   updatedAt      DateTime     @updatedAt
   workflowInstance WorkflowInstance?
   comments       Comment[]
+  tasks          Task[]
 
   @@map("records")
 }
