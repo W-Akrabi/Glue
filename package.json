@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "dotenv -e .env.local -- next dev",
+    "dev:supabase": "dotenv -e .env.production -- next dev",
     "build": "next build",
     "start": "next start",
+    "postinstall": "prisma generate",
     "lint": "eslint",
     "test": "vitest",
     "test:unit": "vitest run tests/unit",
@@ -20,9 +23,13 @@
     "db:dev:reset": "npx prisma migrate reset --force --skip-seed",
     "db:dev:seed": "npx prisma db seed",
     "db:dev:migrate": "npx prisma migrate dev",
+    "db:local:studio": "dotenv -e .env -- prisma studio",
+    "db:supabase:status": "dotenv -e .env.production -- prisma migrate status",
+    "db:supabase:migrate": "dotenv -e .env.production -- prisma migrate deploy",
+    "db:supabase:studio": "dotenv -e .env.production -- prisma studio",
     "db:test:reset": "DATABASE_URL=$TEST_DATABASE_URL npx prisma migrate reset --force --skip-seed",
     "db:test:seed": "DATABASE_URL=$TEST_DATABASE_URL npx prisma db seed",
-    "db:prod:migrate": "dotenv -e .env.production -- prisma migrate deploy"
+    "db:prod:migrate": "npm run db:supabase:migrate"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
