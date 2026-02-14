@@ -395,3 +395,44 @@ Respond ONLY with valid JSON, no markdown.
     except Exception as e:
         print(f"AI assignment error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Catch-all proxy for any other /api/* routes -> Next.js
+@app.api_route("/api/requests/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@app.api_route("/api/requests", methods=["GET", "POST"])
+@app.api_route("/api/sla/{path:path}", methods=["GET", "POST"])
+async def proxy_nextjs_api(request: Request, path: str = ""):
+    full_path = request.url.path
+    target_url = f"{NEXTJS_URL}{full_path}"
+    query = str(request.url.query)
+    if query:
+        target_url += f"?{query}"
+
+    headers = dict(request.headers)
+    headers.pop("host", None)
+    headers.pop("content-length", None)
+
+    body = await request.body()
+
+    async with httpx.AsyncClient(follow_redirects=False, timeout=30.0) as client:
+        resp = await client.request(
+            method=request.method,
+            url=target_url,
+            headers=headers,
+            content=body,
+        )
+
+    excluded_headers = {"transfer-encoding", "content-encoding"}
+    response_headers = {
+        k: v for k, v in resp.headers.multi_items()
+        if k.lower() not in excluded_headers
+    }
+
+    from fastapi.responses import Response as FastAPIResponse
+    return FastAPIResponse(
+        content=resp.content,
+        status_code=resp.status_code,
+        headers=dict(response_headers),
+        media_type=resp.headers.get("content-type"),
+    )
+
