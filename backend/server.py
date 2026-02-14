@@ -71,16 +71,17 @@ async def proxy_auth(request: Request, path: str):
             content=body,
         )
 
-    excluded_headers = {"transfer-encoding", "content-encoding", "content-length"}
+    excluded_headers = {"transfer-encoding", "content-encoding"}
     response_headers = {
-        k: v for k, v in resp.headers.items()
+        k: v for k, v in resp.headers.multi_items()
         if k.lower() not in excluded_headers
     }
 
-    return StreamingResponse(
-        iter([resp.content]),
+    from fastapi.responses import Response as FastAPIResponse
+    return FastAPIResponse(
+        content=resp.content,
         status_code=resp.status_code,
-        headers=response_headers,
+        headers=dict(response_headers),
         media_type=resp.headers.get("content-type"),
     )
 
