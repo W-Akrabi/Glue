@@ -175,3 +175,70 @@ model Notification {
   @@index([userId, readAt])
   @@map("notifications")
 }
+
+enum TaskStatus {
+  BACKLOG
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
+enum TaskType {
+  IMPLEMENTATION
+  REVIEW
+  DOCUMENTATION
+  FOLLOW_UP
+  OTHER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id              String       @id @default(cuid())
+  title           String
+  description     String?
+  status          TaskStatus   @default(BACKLOG)
+  type            TaskType     @default(OTHER)
+  priority        TaskPriority @default(MEDIUM)
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  recordId        String?
+  record          Record?      @relation(fields: [recordId], references: [id], onDelete: SetNull)
+  assigneeId      String?
+  assignee        User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdById     String
+  createdBy       User         @relation("TaskCreator", fields: [createdById], references: [id])
+  parentTaskId    String?
+  parentTask      Task?        @relation("Subtasks", fields: [parentTaskId], references: [id])
+  subtasks        Task[]       @relation("Subtasks")
+  dueAt           DateTime?
+  estimateHours   Float?
+  completedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  blockedBy       TaskDependency[] @relation("BlockedTask")
+  blocking        TaskDependency[] @relation("BlockingTask")
+
+  @@index([organizationId, status])
+  @@index([assigneeId])
+  @@index([recordId])
+  @@map("tasks")
+}
+
+model TaskDependency {
+  id             String @id @default(cuid())
+  blockedTaskId  String
+  blockedTask    Task   @relation("BlockedTask", fields: [blockedTaskId], references: [id], onDelete: Cascade)
+  blockingTaskId String
+  blockingTask   Task   @relation("BlockingTask", fields: [blockingTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([blockedTaskId, blockingTaskId])
+  @@map("task_dependencies")
+}
