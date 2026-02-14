@@ -92,6 +92,22 @@ export default async function DashboardPage({
   const totalCount = pendingCount + approvedCount + rejectedCount;
   const approvalRate = totalCount === 0 ? 0 : Math.round((approvedCount / totalCount) * 100);
 
+  // Task stats
+  const taskStats = await prisma.task.groupBy({
+    by: ['status'],
+    where: { organizationId: session.user.organizationId! },
+    _count: true,
+  });
+  const myTaskCount = await prisma.task.count({
+    where: {
+      organizationId: session.user.organizationId!,
+      assigneeId: session.user.id,
+      status: { notIn: ['DONE'] },
+    },
+  });
+  const totalTasks = taskStats.reduce((sum, s) => sum + s._count, 0);
+  const activeTasks = taskStats.filter((s) => s.status !== 'DONE').reduce((sum, s) => sum + s._count, 0);
+
   return (
     <AppShell
       session={session}
@@ -110,6 +126,14 @@ export default async function DashboardPage({
         </div>
         <div className="flex items-center gap-2 rounded-full border border-[#E6E9F4] bg-white/80 px-4 py-2 text-xs text-[#1F2430] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
           <span className="h-2 w-2 rounded-full bg-rose-400" /> Rejected {rejectedCount}
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-[#4F6AFA]/20 bg-[#4F6AFA]/5 px-4 py-2 text-xs text-[#4F6AFA] shadow-[0_10px_24px_rgba(79,106,250,0.08)]">
+          <span className="h-2 w-2 rounded-full bg-[#4F6AFA]" />
+          <Link href="/tasks">{activeTasks} Active Tasks</Link>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-[#E6E9F4] bg-white/80 px-4 py-2 text-xs text-[#1F2430] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+          <span className="h-2 w-2 rounded-full bg-blue-400" />
+          <Link href="/tasks">{myTaskCount} My Tasks</Link>
         </div>
         <div className="ml-auto hidden items-center gap-2 text-xs text-[#6B7280] md:flex">
           <span>Approval rate</span>
