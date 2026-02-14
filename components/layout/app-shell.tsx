@@ -6,6 +6,7 @@ import RightRail from './right-rail';
 import { ReactNode } from 'react';
 import {
   Building2,
+  CheckSquare,
   FilePlus2,
   Files,
   GitBranch,
@@ -24,7 +25,7 @@ export type AppShellProps = {
       organizationId?: string | null;
     };
   };
-  activeNav: 'dashboard' | 'requests' | 'org' | 'admin-entity' | 'admin-workflows' | 'settings';
+  activeNav: 'dashboard' | 'requests' | 'tasks' | 'org' | 'admin-entity' | 'admin-workflows' | 'settings';
   headerTitle: string;
   headerSubtitle?: string;
   topAction?: { label: string; href: string };
@@ -128,6 +129,19 @@ export default function AppShell({
             >
               <Files className="h-4 w-4" />
               Records
+            </Link>
+            <Link
+              href="/tasks"
+              data-tour="nav-tasks"
+              data-testid="nav-tasks"
+              className={`${navLinkBase} ${
+                activeNav === 'tasks'
+                  ? 'bg-[#EEF1FA] text-[#4F6AFA]'
+                  : 'text-[#6B7280] hover:bg-[#EEF1FA] hover:text-[#1F2430]'
+              }`}
+            >
+              <CheckSquare className="h-4 w-4" />
+              Tasks
             </Link>
             {role !== 'VIEWER' ? (
               <Link
