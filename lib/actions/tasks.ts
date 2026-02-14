@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -10,11 +11,33 @@ type TaskState = {
   success?: boolean;
 };
 
-export async function createTask(_prevState: TaskState, formData: FormData) {
+async function getDbUserFromSession() {
   const session = await auth();
-  if (!session?.user) {
-    return { error: 'Unauthorized' };
+  if (!session?.user?.id) {
+    return { error: 'Unauthorized' as const };
   }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, organizationId: true },
+  });
+
+  if (!user) {
+    return {
+      error:
+        'Session is out of sync with the current database. Please sign out and sign in again.',
+    } as const;
+  }
+
+  return { user } as const;
+}
+
+export async function createTask(_prevState: TaskState, formData: FormData) {
+  const userResult = await getDbUserFromSession();
+  if ('error' in userResult) {
+    return { error: userResult.error };
+  }
+  const { user } = userResult;
 
   const title = String(formData.get('title') || '').trim();
   if (!title) {
@@ -42,8 +65,8 @@ export async function createTask(_prevState: TaskState, formData: FormData) {
         type: type as 'IMPLEMENTATION' | 'REVIEW' | 'DOCUMENTATION' | 'FOLLOW_UP' | 'OTHER',
         priority: priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
         status: status as 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'BLOCKED' | 'DONE',
-        organizationId: session.user.organizationId!,
-        createdById: session.user.id,
+        organizationId: user.organizationId,
+        createdById: user.id,
         assigneeId,
         recordId,
         parentTaskId,
@@ -56,6 +79,12 @@ export async function createTask(_prevState: TaskState, formData: FormData) {
     revalidatePath('/dashboard');
   } catch (error) {
     console.error('Failed to create task:', error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      return {
+        error:
+          'Task references data that does not exist in this database. Please refresh and try again.',
+      };
+    }
     return { error: 'Failed to create task' };
   }
 
@@ -63,10 +92,11 @@ export async function createTask(_prevState: TaskState, formData: FormData) {
 }
 
 export async function updateTaskStatus(taskId: string, newStatus: string) {
-  const session = await auth();
-  if (!session?.user) {
-    return { error: 'Unauthorized' };
+  const userResult = await getDbUserFromSession();
+  if ('error' in userResult) {
+    return { error: userResult.error };
   }
+  const { user } = userResult;
 
   const validStatuses = ['BACKLOG', 'TODO', 'IN_PROGRESS', 'BLOCKED', 'DONE'];
   if (!validStatuses.includes(newStatus)) {
@@ -75,7 +105,7 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
 
   try {
     const task = await prisma.task.findFirst({
-      where: { id: taskId, organizationId: session.user.organizationId! },
+      where: { id: taskId, organizationId: user.organizationId },
     });
 
     if (!task) {
@@ -100,10 +130,11 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
 }
 
 export async function updateTask(taskId: string, _prevState: TaskState, formData: FormData) {
-  const session = await auth();
-  if (!session?.user) {
-    return { error: 'Unauthorized' };
+  const userResult = await getDbUserFromSession();
+  if ('error' in userResult) {
+    return { error: userResult.error };
   }
+  const { user } = userResult;
 
   const title = String(formData.get('title') || '').trim();
   if (!title) {
@@ -121,6 +152,14 @@ export async function updateTask(taskId: string, _prevState: TaskState, formData
   const estimateHours = estimateRaw ? parseFloat(estimateRaw) : null;
 
   try {
+    const task = await prisma.task.findFirst({
+      where: { id: taskId, organizationId: user.organizationId },
+      select: { id: true },
+    });
+    if (!task) {
+      return { error: 'Task not found' };
+    }
+
     await prisma.task.update({
       where: { id: taskId },
       data: {
@@ -144,12 +183,21 @@ export async function updateTask(taskId: string, _prevState: TaskState, formData
 }
 
 export async function deleteTask(taskId: string) {
-  const session = await auth();
-  if (!session?.user) {
-    return { error: 'Unauthorized' };
+  const userResult = await getDbUserFromSession();
+  if ('error' in userResult) {
+    return { error: userResult.error };
   }
+  const { user } = userResult;
 
   try {
+    const task = await prisma.task.findFirst({
+      where: { id: taskId, organizationId: user.organizationId },
+      select: { id: true },
+    });
+    if (!task) {
+      return { error: 'Task not found' };
+    }
+
     await prisma.task.delete({
       where: { id: taskId },
     });

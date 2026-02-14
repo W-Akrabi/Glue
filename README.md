@@ -72,6 +72,10 @@ npm run db:supabase:studio
 Compatibility alias:
 - `npm run db:prod:migrate` maps to `npm run db:supabase:migrate`.
 
+When switching between local and Supabase DB targets:
+- Sign out and sign in again after switching.
+- Existing auth session cookies may still contain user/org IDs from the previous database.
+
 ## Command reference
 Core app:
 - `npm run dev` -> default Next dev mode
