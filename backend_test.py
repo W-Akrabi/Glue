@@ -42,10 +42,10 @@ class TaskManagementAPITester:
 
     def test_ai_task_suggestions(self) -> bool:
         """Test AI task suggestions endpoint"""
-        # Using mock data since we don't have real user IDs for testing
+        # Using real user IDs from the context
         test_payload = {
-            "userId": "test-user-id",
-            "organizationId": "test-org-id"
+            "userId": "cmlllcxj70006tf6l5dunkufz",
+            "organizationId": "cmlllcxgi0000tf6l28970nrz"
         }
         
         try:
